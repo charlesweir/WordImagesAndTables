@@ -94,8 +94,8 @@ Sub UpdateAllFieldsIn(doc As Document)
     ' Now update references
      ' If you use Zotero or similar, replace this with their update method.
      
-    ' For Mendeley. Needs Tools - References - MendeleyPlugin ticked.
-    ' Then uncomment the next line. Zotero will have something similar (TBD)
+    ' For Mendeley. Needs the library reference: Tools - References - MendeleyPlugin ticked.
+    ' Then uncomment the next line. For Zotero, it's ZoteroRefresh (but I don't know the library name)
     ' Refresh
     
     ' And change the bibliography to be the 'Bibliography' style.
