@@ -1,7 +1,7 @@
 # WordSupport
 Microsoft Word VBA Macros and autotext to add missing features.
 
-Download the latest release [here](https://github.com/charlesweir/WordSupport/releases/download/V1.1/ReleaseV1.2.zip)
+Download the latest release [here](https://github.com/charlesweir/WordSupport/releases/download/V1.2/ReleaseV1.2.zip)
 
 ## WordPicture.docm
 This contains two autotext entries, to support proper floating images and tables. It allows you to arrange them as Latex or other page layout tools would do it. There is VBA macro support, both to manage the layout, and to make it easy to replace images with new versions. 
