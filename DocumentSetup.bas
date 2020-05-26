@@ -1,3 +1,26 @@
+' Microsoft Word Setup and Update macros
+'
+' Copyright (c) 2020 Charles Weir
+'
+' This contains two VBA macros that are useful with almost any document.
+' SetupMasterForEditing: Changes the view and layout (especially for master documents)
+'     to something more useful than the default.
+' UpdateAllFields: Updates every field, contents table, and reference in the document. Also
+'     makes Mendeley/Zotero bibliographies reformattable.
+'
+'This program is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    This program is distributed in the hope that it will be useful,
+'    but WITHOUT ANY WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+'
+'    You should have received a copy of the GNU General Public License
+'    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    
 Attribute VB_Name = "DocumentSetup"
 Sub SetupMasterForEditing()
 '
