@@ -6,7 +6,7 @@
 ' SetupMasterForEditing: Changes the view and layout (especially for master documents)
 '     to something more useful than the default.
 ' UpdateAllFields: Updates every field, contents table, and reference in the document. Also
-'     makes Mendeley/Zotero bibliographies reformattable.
+'     makes Mendeley/Zotero bibliographies reformattable (needs setup as documented in UpdateAllFieldsIn )
 '
 'This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -95,7 +95,8 @@ Sub UpdateAllFieldsIn(doc As Document)
      ' If you use Zotero or similar, replace this with their update method.
      
     ' For Mendeley. Needs Tools - References - MendeleyPlugin ticked.
-    Refresh
+    ' Then uncomment the next line. Zotero will have something similar (TBD)
+    ' Refresh
     
     ' And change the bibliography to be the 'Bibliography' style.
     RestyleBibliography
