@@ -1,22 +1,15 @@
+Attribute VB_Name = "FiguresAndTables"
 ' Functions for image manipulation in Word
-' See WordPicture.docm (which contains a copy of this) for instructions.
 '
 ' Copyright (c) 2020 Charles Weir
 '
-'This program is free software: you can redistribute it and/or modify
-'    it under the terms of the GNU General Public License as published by
-'    the Free Software Foundation, either version 3 of the License, or
-'    (at your option) any later version.
+'Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 '
-'    This program is distributed in the hope that it will be useful,
-'    but WITHOUT ANY WARRANTY; without even the implied warranty of
-'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-'    GNU General Public License for more details.
+'The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 '
-'    You should have received a copy of the GNU General Public License
-'    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+'
 
-Attribute VB_Name = "FiguresAndTables"
 
 Static Sub PreserveImageCroppingAndSizing(IsPaste)
 ' Support for updating an image to a new version while preserving cropping and sizing.
@@ -87,7 +80,7 @@ Sub RepositionFloatingImage()
     Dim myShape As Shape
     Dim AnchorParagraph As Paragraph
       
-    If Selection.ShapeRange.Count > 0 Then
+    If Selection.ShapeRange.count > 0 Then
         Set myShape = Selection.ShapeRange(1)
     Else
         MsgBox "Please select a floating image, shape or textbox first."
@@ -95,9 +88,9 @@ Sub RepositionFloatingImage()
     End If
 
     With myShape
-        If Selection.Sections(1).PageSetup.TextColumns.Count > 1 Then
+        If Selection.Sections(1).pageSetup.TextColumns.count > 1 Then
             ' Column layout. In column if small enough, else page. Toggle top/bottom
-            MaxSingleColumnImageWidth = Selection.Sections(1).PageSetup.TextColumns.Width + Selection.Sections(1).PageSetup.TextColumns.Spacing
+            MaxSingleColumnImageWidth = Selection.Sections(1).pageSetup.TextColumns.Width + Selection.Sections(1).pageSetup.TextColumns.Spacing
             .WrapFormat.Type = wdWrapTopBottom
             If .Width > MaxSingleColumnImageWidth Then
                 .RelativeHorizontalPosition = wdRelativeHorizontalPositionMargin
@@ -113,7 +106,7 @@ Sub RepositionFloatingImage()
             End If
         Else
             ' One column.
-            HalfPageWidth = Selection.Sections(1).PageSetup.TextColumns.Width / 2
+            HalfPageWidth = Selection.Sections(1).pageSetup.TextColumns.Width / 2
             If .Width < HalfPageWidth Then
                 'Small picture. Put near anchor, wrap around. Toggle left/right
                 .WrapFormat.Type = wdWrapSquare
