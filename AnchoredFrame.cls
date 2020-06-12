@@ -88,6 +88,23 @@ Private Property Get FrameBookmark() As Bookmark
     Set FrameBookmark = bookmarkSet(1)
 End Property
 
+Private Property Get FirstCaption() As Range
+    ' Answers the text (not numbering) part of the first caption in the frame.
+    Dim para As Paragraph
+    For Each para In myFrame.TextFrame.TextRange.Paragraphs
+        If para.style = "Caption" Then GoTo FoundPara ' Could be Like, if several caption types
+    Next para: Debug.Assert False ' No caption found
+FoundPara:
+    Set FirstCaption = para.Range
+    FirstCaption.Collapse
+    FirstCaption.MoveWhile " FigureTabl" ' Skip the Figure or table part
+    Do While FirstCaption.Information(wdInFieldCode)
+        FirstCaption.Move wdCharacter
+    Loop
+    FirstCaption.MoveEnd wdParagraph
+    FirstCaption.MoveEnd wdCharacter, -1 ' Not cr at end.
+End Property
+
 Public Property Get Name() As String
     ' Answers the name, such as "Figure 1" or "Table 3"
     Name = FrameBookmark.Range.Text ' Gives "Figure NN"
@@ -141,7 +158,43 @@ Public Sub SetToFloatAt(topOrBottom As Long)
         If .Top <> topOrBottom Then .Top = topOrBottom
     End With
 End Sub
-            
+       
+' Static
+Public Sub InitWithNewFrameAt(oRng As Range, autotextName As String)
+    ' Create a new frame and reference to it at the given point by inserting the specified autotext (which must be a floating frame)
+    ' ToDo Can't get word to omit the caption from the
+    Dim rngInsertedAnchor As Range
+    Set rngInsertedAnchor = ActiveDocument.AttachedTemplate.AutoTextEntries(autotextName).Insert(where:=oRng, RichText:=True)
+    Debug.Assert rngInsertedAnchor.ShapeRange.count = 1 ' Autotext contains floating frame
+    Set Frame = rngInsertedAnchor.ShapeRange(1)
+    InsertCrossReferenceBesideAnchor
+End Sub
+
+Private Sub InsertCrossReferenceBesideAnchor()
+    Dim oldCaption As String
+    oldCaption = FirstCaption.Text
+    FirstCaption.Text = "TAG" & Int(99999999 * Rnd)
+    Dim items() As String
+    items = ActiveDocument.GetCrossReferenceItems("Figure")
+    ' Answers an array of strings, "123. Figure 1/ The Caption", plus all the numbered paras etc.
+    
+    Dim item As Variant
+    Dim searchString As String
+    searchString = "*" & FirstCaption.Text & "*"
+    For Each item In items
+        If item Like searchString Then GoTo ItemFound
+    Next item: Debug.Assert False ' Tag not found. Ouch!
+ItemFound:
+
+        ' Also wdCaptionTable
+    Dim afterAnchor As Range
+    afterAnchor.Collapse
+    
+    afterAnchor.InsertCrossReference ReferenceType:=wdCaptionFigure, ReferenceKind:=wdOnlyLabelAndNumber, ReferenceItem:=item
+    Set RefField = afterAnchor.Fields(1)
+    myFrame.TextFrame.TextRange.Fields.Update
+    myReferencingField.Update
+End Sub
 ' Static
 Public Function IsValidFrame(shp As Shape) As Boolean
     ' Is this a text frame containing a caption that we need to layout?

@@ -23,7 +23,6 @@ Dim workingPosition As Range
 Dim nextPage As Range
 Dim spaceUsedOnCurrentPage As Single
 
-    
 Sub Initialise()
     workingPage = 0
     workingPageStatus = pfsUnfilled
@@ -46,8 +45,6 @@ Sub PositionFrame(newFrame As anchoredFrame)
             Else
                 workingPosition.Move wdCharacter ' Move past the last paste.
             End If
-        ElseIf workingPageStatus = pfsBottomFilled Then
-            workingPageStatus = pfsOverFilled ' We'll have to put it on the next page.
         End If
                     
         ' If we have a top or bottom slot free:
@@ -65,55 +62,53 @@ Sub PositionFrame(newFrame As anchoredFrame)
                 workingPageStatus = pfsBottomFilled
             End If
     
-            '  If the anchor is now on a different page number, or Word has misbehaved and put both overlapping anyway.
-            ' Word also seems to behave oddly when there's two frames and only one line of text (and it looks pretty odd too):
-            ' Let's say we we want at least 10% of page for text when there are two frames on the page.
-            If (.FramePageNumber > workingPage) _
-                 Or ((workingPageStatus = pfsBottomFilled) And (spaceUsedOnCurrentPage + .Height > (.UsableDocumentHeight * 0.9))) Then
-                ' And we'll treat it as though we had no space in the first place.
-                workingPageStatus = pfsOverFilled
+            ' Unless
+            '   the anchor is now on a different page number, or Word has misbehaved and put both overlapping anyway.
+            '   Word also seems to behave oddly when there's two frames and only one line of text (and it looks pretty odd too):
+            '   Let's say we we want at least 10% of page for text when there are two frames on the page.
+            ' we're done.
+            If Not ((.FramePageNumber > workingPage) _
+                    Or ((workingPageStatus = pfsBottomFilled) And (spaceUsedOnCurrentPage + .Height > (.UsableDocumentHeight * 0.9)))) Then
+                ' We're done
+                Debug.Assert workingPageStatus = pfsTopFilled Or workingPageStatus = pfsBottomFilled
+                spaceUsedOnCurrentPage = IIf(workingPageStatus = pfsBottomFilled, .UsableDocumentHeight, .Height)
+                Exit Sub
             End If
         End If
         
-        ' If there wasn't space enough on that page, put it on the next one:
-        If workingPageStatus = pfsOverFilled Then
-            .Stash ' Get it out of the way.
-            
-            ' Find the first para (line?) on the next page
-            ' Skip over any tables, as tables make a right mess.
-            Debug.Assert workingPosition.Information(wdActiveEndPageNumber) = workingPage
-            Set nextPage = workingPosition.GoTo(wdGoToPage, wdGoToNext)
-            ' Kludge. The above sometimes goes wrong (but not when stepping through in the debugger):
-            If nextPage.Information(wdActiveEndPageNumber) = workingPage + 1 Then
-                Set workingPosition = nextPage
-            Else
-                While workingPosition.Information(wdActiveEndPageNumber) = workingPage
-                    workingPosition.Move wdParagraph
-                Wend
-            End If
-            
-            While workingPosition.Information(wdWithInTable) _
-                     And (Not workingPosition.Next(Unit:=wdParagraph) Is Nothing)
+        ' OK. There wasn't space enough on that page, put it on the next one:
+        .Stash ' Get it out of the way.
+        
+        ' Find the first para (line?) on the next page
+        Debug.Assert workingPosition.Information(wdActiveEndPageNumber) = workingPage
+        Set nextPage = workingPosition.GoTo(wdGoToPage, wdGoToNext)
+        ' Kludge. The above sometimes goes wrong (but not when stepping through in the debugger):
+        If nextPage.Information(wdActiveEndPageNumber) = workingPage + 1 Then
+            Set workingPosition = nextPage
+        Else
+            ' Gone wrong. Use another approach to find the next page.
+            While workingPosition.Information(wdActiveEndPageNumber) = workingPage
                 workingPosition.Move wdParagraph
             Wend
-    
-            ' N.B. There might not be enough paras to take all the images. Also we might end up in the middle of the bibliography.
-            ' Both would be unusual in academic papers. Forget it.
-            
-            ' And move it there
-            .MoveAnchorTo workingPosition
-            .SetToFloatAt (wdShapeTop)
-            workingPageStatus = pfsTopFilled
         End If
         
-        workingPage = workingPosition.Information(wdActiveEndPageNumber)
-        If workingPageStatus = pfsTopFilled Then
-            spaceUsedOnCurrentPage = .Height
-        Else
-            spaceUsedOnCurrentPage = 0
-        End If
-    End With
+        ' Skip over any tables, as tables make a right mess.
+        While workingPosition.Information(wdWithInTable) _
+                 And (Not workingPosition.Next(Unit:=wdParagraph) Is Nothing)
+            workingPosition.Move wdParagraph
+        Wend
 
+        ' N.B. There might not be enough paras to take all the images. Also we might end up in the middle of the bibliography.
+        ' Both would be unusual in academic papers. Forget it.
+        
+        ' And move it there
+        .MoveAnchorTo workingPosition
+        .SetToFloatAt (wdShapeTop)
+        
+        workingPageStatus = pfsTopFilled
+        workingPage = workingPosition.Information(wdActiveEndPageNumber)
+        spaceUsedOnCurrentPage = .Height
+    End With
 End Sub
 
 Private Property Get NumColumns() As Integer
