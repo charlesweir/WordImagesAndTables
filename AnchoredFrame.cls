@@ -13,9 +13,11 @@ Option Explicit
 
 Private myFrame As Shape
 Private myReferencingField As field
+Private myOriginalSectionNumber As Integer ' we get moved to the document end. Remember our section number.
 
 Public Property Set Frame(newFrame As Shape)
     Set myFrame = newFrame
+    myOriginalSectionNumber = myFrame.Anchor.Information(wdActiveEndSectionNumber)
 End Property
 
 Public Property Set RefField(newField As field)
@@ -30,29 +32,36 @@ Public Property Get FramePageNumber() As Integer
     ' Answers the page number containing the frame.
     FramePageNumber = myFrame.Anchor.Information(wdActiveEndPageNumber)
 End Property
+
 Public Property Get ReferencePageNumber() As Integer
-    ' Answers the page number containing the frame.
+    ' Answers the page number containing the (end of the) referencing field.
     ReferencePageNumber = myReferencingField.Result.Information(wdActiveEndPageNumber)
+End Property
+
+Public Property Get ReferenceColumnNumber() As Integer
+    ' Answers the column number containing the referencing field.
+    ReferenceColumnNumber = ColumnNumberFor(myReferencingField)
 End Property
 
 Public Property Get SectionNumber() As Integer
     ' Answers the page number containing the frame.
-    SectionNumber = myFrame.Anchor.Information(wdActiveEndSectionNumber)
+    SectionNumber = myOriginalSectionNumber
 End Property
-Private Property Get NumColumns() As Integer
+
+Public Property Get NumColumns() As Integer
     ' Answers the number of text columns on the page (1 or 2)
     NumColumns = CurrentPageSetup.TextColumns.count
     Debug.Assert NumColumns <= 2
 End Property
 
 Private Property Get CurrentSection() As Section
+    ' The Word Section object containing the frame.
     Set CurrentSection = ActiveDocument.Sections(SectionNumber)
 End Property
 
 Private Property Get CurrentPageSetup() As pageSetup
     Set CurrentPageSetup = CurrentSection.pageSetup
 End Property
-
 
 Public Property Get PlaceNearReference() As Range
     ' Answers a safe place to put an anchor beside the primary reference.
@@ -107,7 +116,7 @@ End Property
 
 Public Property Get Name() As String
     ' Answers the name, such as "Figure 1" or "Table 3"
-    Name = FrameBookmark.Range.Text ' Gives "Figure NN"
+    Name = FrameBookmark.Range.Text
 End Property
 
 Public Property Get UsableDocumentHeight() As Single
@@ -123,7 +132,9 @@ Public Property Get BookmarkId() As String
 End Property
 
 Public Property Get FitsInColumn() As Boolean
-    FitsInColumn = myFrame.Width < CurrentPageSetup.TextColumns.Width
+    ' Does the frame fit in a single column?
+    ' Answers true for single column mode in case an image is a little wide for the text.
+    FitsInColumn = (NumColumns = 1) Or (myFrame.Width < CurrentPageSetup.TextColumns.Width)
 End Property
 
 Public Sub MoveAnchorTo(workingPosition As Range)
@@ -136,7 +147,6 @@ Public Sub MoveAnchorTo(workingPosition As Range)
         Set workingPosition = workingPosition.Next(Unit:=wdCharacter)
         workingPosition.Collapse wdCollapseEnd
     Wend
-    'Debug.Assert Not (workingPosition.Information(wdInFieldCode) Or workingPosition.Information(wdInFieldResult))
     workingPosition.Paste
 End Sub
 
@@ -220,7 +230,20 @@ Public Function BookmarkIdFromField(fld As field) As String
     BookmarkIdFromField = Split(fld.Code.Text, " ")(2)
 End Function
  
+' Static
+Public Function ColumnNumberFor(rng As Range) As Integer
+    ' Answers the column number of rng (1 or 2)
+    ColumnNumberFor = 1 ' default
+    ' In the left hand column, the distance from the page edge is the distance from the page boundry plus the left margin.
+    ' So if we're further away, we're in the right hand column
+    Dim ps As pageSetup
+    Set ps = ActiveDocument.Sections(rng.Information(wdActiveEndSectionNumber)).pageSetup
+    
+    If ps.TextColumns.count > 1 And _
+            rng.Information(wdHorizontalPositionRelativeToPage) > rng.Information(wdHorizontalPositionRelativeToTextBoundary) + _
+                    ps.LeftMargin + 1 Then
+        ColumnNumberFor = 2
+    End If
+End Function
 
- ' shp.Top = IIf(testLocation = "top", wdShapeTop, wdShapeBottom)
-            
             

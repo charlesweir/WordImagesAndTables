@@ -8,14 +8,7 @@ Attribute VB_Name = "LayoutFloatingImages"
 'The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 '
 'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-'Option Explicit ' All variables must be defined.
-
-Private Enum PageFillStatus
- pfsUnfilled = 0 ' No frames in this page
- pfsTopFilled = 1 ' Frame at the top
- pfsBottomFilled = 2 ' Frame at the top and the bottom
- pfsOverFilled = 3 ' Definitely need to position on the next page.
-End Enum
+Option Explicit ' All variables must be defined.
 
 
 Sub LayoutFloatingImages()
@@ -38,11 +31,11 @@ Public Sub LayoutFloatingImagesFor(region As Range)
     
     ' First, find all the frames and their hidden cross reference bookmarks:
     Dim currentFrame As Shape
-    For Each currentFrame In ActiveDocument.Shapes
+    For Each currentFrame In region.ShapeRange
         If AnchoredFrameClass.IsValidFrame(currentFrame) Then
             Set oAnchoredFrame = New anchoredFrame
             Set oAnchoredFrame.Frame = currentFrame
-            myAnchoredFrames.Add Item:=oAnchoredFrame, key:=oAnchoredFrame.BookmarkId
+            myAnchoredFrames.Add item:=oAnchoredFrame, key:=oAnchoredFrame.BookmarkId
         End If
     Next
     
@@ -51,8 +44,13 @@ Public Sub LayoutFloatingImagesFor(region As Range)
 
     Dim ReferencingField As field
     Dim bookmarkName As String
-
+    Dim previousField As field
+    
     For Each ReferencingField In region.Fields
+        ' Word can take several minutes to sort the fields after you open a new document.
+        ' If this next assertion fails, get on with something else and come back to do this again later.
+        If Not previousField Is Nothing Then Debug.Assert ReferencingField.Result.Start >= previousField.Result.Start
+        
         bookmarkName = AnchoredFrameClass.BookmarkIdFromField(ReferencingField)
         If bookmarkName <> "" And ContainsKey(myAnchoredFrames, bookmarkName) Then
             Set oAnchoredFrame = myAnchoredFrames(bookmarkName)
@@ -65,6 +63,7 @@ Public Sub LayoutFloatingImagesFor(region As Range)
                 myAnchoredFrames.Remove bookmarkName
             End If
         End If
+        Set previousField = ReferencingField
     Next ReferencingField
     
     ' OK. So now we have all the frames we want to reposition, and the locations of their first relevant reference:
@@ -78,15 +77,16 @@ Public Sub LayoutFloatingImagesFor(region As Range)
     ' OK So all the frames are out of the way. Here's the interesting stuff.
     ' Take each one and position it as close as possible to its reference according to the Latex (Knuth?) algorithm.
     
-    Dim ColumnLayout As New ColumnLayout
-    ColumnLayout.Initialise
+    Dim clsColumnLayout As New ColumnLayout
+    clsColumnLayout.Initialise
 
     For Each oAnchoredFrame In myFramesToLayout
-        ColumnLayout.PositionFrame oAnchoredFrame
+        ShowStatusBarMessage ("Positioning " & oAnchoredFrame.Name)
+        clsColumnLayout.PositionFrame oAnchoredFrame
     Next oAnchoredFrame
     
     EmptyCutBuffer
-    ShowStatusBarMessage ("Repositioned " & count & " frames")
+    ShowStatusBarMessage ("Repositioned " & myFramesToLayout.count & " frames")
 End Sub
 
 Private Sub EmptyCutBuffer()

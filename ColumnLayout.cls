@@ -10,57 +10,54 @@ Attribute VB_Exposed = False
     ' ColumnLayout: Represents the layout for the current column.
 Option Explicit
 
-Private Enum PageFillStatus
-    pfsUnfilled = 0 ' No frames in this page
-    pfsTopFilled = 1 ' Frame at the top
-    pfsBottomFilled = 2 ' Frame at the top and the bottom
-    pfsOverFilled = 3 ' Definitely need to position on the next page.
+Dim workingPage As Integer
+' Dim workingColumn As Integer
+' Dim workingPageStatus As PageFillStatus
+' Dim workingColumnStatus As PageFillStatus
+Dim workingPosition As Range
+Dim clsAnchoredFrame As New anchoredFrame
+
+Private Enum PossiblePosition
+    ppTop = 1 ' Frame at the top
+    ppBottom = 2 ' Frame at the top and the bottom
+    ppElsewhere = 3 ' Definitely need to position on the next page.
 End Enum
 
-Dim workingPage As Integer
-Dim workingPageStatus As PageFillStatus
-Dim workingPosition As Range
-Dim nextPage As Range
-Dim spaceUsedOnCurrentPage As Single
+Dim spaceUsedInColumn(3) As Integer ' 0, 1, 2
 
 Sub Initialise()
     workingPage = 0
-    workingPageStatus = pfsUnfilled
+    Set workingPosition = ActiveDocument.Content
+    workingPosition.Collapse
 End Sub
+
+Sub CheckForNewPage()
+    ' If we've moved to a new page, reset everything
+    If CurrentPage <> workingPage Then
+        workingPage = CurrentPage
+        spaceUsedInColumn(1) = 0
+        spaceUsedInColumn(2) = 0
+    End If
+End Sub
+
 
         
 Sub PositionFrame(newFrame As anchoredFrame)
     With newFrame
-        ShowStatusBarMessage ("Positioning " & .Name)
-        
-        ' Work out where to try to put it:
-        If .ReferencePageNumber > workingPage Then
-            workingPage = .ReferencePageNumber
-            workingPageStatus = pfsUnfilled
+        If workingPosition.Start < .ReferenceFieldStart.Start Then
             Set workingPosition = .PlaceNearReference
-        ElseIf workingPageStatus = pfsTopFilled Then
-            ' If the reference is ahead of the working position, move the working position forward.
-            If workingPosition.Start < .ReferenceFieldStart.Start Then
-                Set workingPosition = .PlaceNearReference
-            Else
-                workingPosition.Move wdCharacter ' Move past the last paste.
-            End If
+        Else
+            workingPosition.Move wdCharacter ' Move past any previous paste.
         End If
-                    
-        ' If we have a top or bottom slot free:
-        If (workingPageStatus = pfsUnfilled) Or (workingPageStatus = pfsTopFilled) Then
         
+        CheckForNewPage
+        
+        If desiredPosition(newFrame) <> ppElsewhere Then
             ' Try moving it to the working position, at the top or bottom of the page:
             .MoveAnchorTo workingPosition
     
             ' Todo: Add special case. Top of page is continued table, in which case we want to be bottom.
-            If workingPageStatus = pfsUnfilled Then
-                .SetToFloatAt (wdShapeTop)
-                workingPageStatus = pfsTopFilled
-            Else
-                .SetToFloatAt (wdShapeBottom)
-                workingPageStatus = pfsBottomFilled
-            End If
+            .SetToFloatAt IIf(desiredPosition(newFrame) = ppTop, wdShapeTop, wdShapeBottom)
     
             ' Unless
             '   the anchor is now on a different page number, or Word has misbehaved and put both overlapping anyway.
@@ -68,10 +65,9 @@ Sub PositionFrame(newFrame As anchoredFrame)
             '   Let's say we we want at least 10% of page for text when there are two frames on the page.
             ' we're done.
             If Not ((.FramePageNumber > workingPage) _
-                    Or ((workingPageStatus = pfsBottomFilled) And (spaceUsedOnCurrentPage + .Height > (.UsableDocumentHeight * 0.9)))) Then
+                    Or ((spaceUsedInColumn(CurrentColumn) > 0) And (spaceUsedInColumn(CurrentColumn) + .Height > (.UsableDocumentHeight * 0.9)))) Then
                 ' We're done
-                Debug.Assert workingPageStatus = pfsTopFilled Or workingPageStatus = pfsBottomFilled
-                spaceUsedOnCurrentPage = IIf(workingPageStatus = pfsBottomFilled, .UsableDocumentHeight, .Height)
+                UpdateColumnSpace newFrame
                 Exit Sub
             End If
         End If
@@ -79,18 +75,29 @@ Sub PositionFrame(newFrame As anchoredFrame)
         ' OK. There wasn't space enough on that page, put it on the next one:
         .Stash ' Get it out of the way.
         
-        ' Find the first para (line?) on the next page
-        Debug.Assert workingPosition.Information(wdActiveEndPageNumber) = workingPage
-        Set nextPage = workingPosition.GoTo(wdGoToPage, wdGoToNext)
-        ' Kludge. The above sometimes goes wrong (but not when stepping through in the debugger):
-        If nextPage.Information(wdActiveEndPageNumber) = workingPage + 1 Then
-            Set workingPosition = nextPage
-        Else
-            ' Gone wrong. Use another approach to find the next page.
-            While workingPosition.Information(wdActiveEndPageNumber) = workingPage
+        ' Find the first para (line?) on the next column
+        Debug.Assert workingPage = CurrentPage
+        Dim startColumn As Integer
+        Dim nextPage As Range
+        startColumn = CurrentColumn
+        
+        If .NumColumns = 2 Then
+            While CurrentColumn = startColumn And CurrentPage = workingPage
                 workingPosition.Move wdParagraph
             Wend
+        Else ' Single column
+            Set nextPage = workingPosition.GoTo(wdGoToPage, wdGoToNext)
+            ' Kludge. The above sometimes goes wrong (but not when stepping through in the debugger):
+            If nextPage.Information(wdActiveEndPageNumber) = workingPage + 1 Then
+                Set workingPosition = nextPage
+            Else
+                ' Gone wrong. Use another approach to find the next page.
+                While workingPosition.Information(wdActiveEndPageNumber) = workingPage
+                    workingPosition.Move wdParagraph
+                Wend
+            End If
         End If
+        CheckForNewPage
         
         ' Skip over any tables, as tables make a right mess.
         While workingPosition.Information(wdWithInTable) _
@@ -103,40 +110,50 @@ Sub PositionFrame(newFrame As anchoredFrame)
         
         ' And move it there
         .MoveAnchorTo workingPosition
-        .SetToFloatAt (wdShapeTop)
-        
-        workingPageStatus = pfsTopFilled
-        workingPage = workingPosition.Information(wdActiveEndPageNumber)
-        spaceUsedOnCurrentPage = .Height
+        .SetToFloatAt IIf(desiredPosition(newFrame) = ppTop, wdShapeTop, wdShapeBottom)
+        UpdateColumnSpace newFrame
     End With
 End Sub
 
-Private Property Get NumColumns() As Integer
-    NumColumns = CurrentPageSetup.TextColumns.count
-End Property
-
-Private Property Get CurrentPageSetup() As pageSetup
-    Set CurrentPageSetup = ActiveDocument.Sections(workingPosition.Information(wdActiveEndSectionNumber)).pageSetup
-End Property
-
-
-Private Function ColumnNumber(rng As Range) As Integer
-    ' Answers the column number of rng (1 or 2)
-    ColumnNumber = 1 ' default
-    ' In the left hand column, the distance from the page edge is the distance from the page boundry plus the left margin.
-    ' So if we're further away, we're in the right hand column
-    If NumColumns > 1 And _
-           rng.Information(wdHorizontalPositionRelativeToPage) > rng.Information(wdHorizontalPositionRelativeToTextBoundary) + CurrentPageSetup.LeftMargin + 1 Then
-        ColumnNumber = 2
-    End If
-End Function
-
-Private Sub ShowStatusBarMessage(message As String)
-    If message = "" Then
-        Application.StatusBar = " "
-    Else
-        Application.StatusBar = message
-    End If
-    DoEvents
+Private Sub UpdateColumnSpace(oAnchoredFrame As anchoredFrame)
+    With oAnchoredFrame
+        If .FitsInColumn Then ' Single column, or small frame in double column.
+            spaceUsedInColumn(CurrentColumn) = IIf(spaceUsedInColumn(CurrentColumn) = 0, .Height, .UsableDocumentHeight)
+            Exit Sub
+        End If
+  
+        spaceUsedInColumn(1) = .Height
+        spaceUsedInColumn(2) = .Height
+    End With
 End Sub
 
+Private Function desiredPosition(oAnchoredFrame As anchoredFrame) As PossiblePosition
+    ' Answers where we'd like to place the image (ignoring that it might end up on the following page/column when we try),
+    ' given the current workingPosition
+    With oAnchoredFrame
+        If .FitsInColumn Then
+            If spaceUsedInColumn(CurrentColumn) = 0 Then
+                desiredPosition = ppTop
+            ElseIf spaceUsedInColumn(CurrentColumn) > 0 And spaceUsedInColumn(CurrentColumn) < .UsableDocumentHeight Then
+                desiredPosition = ppBottom
+            Else
+                desiredPosition = ppElsewhere
+            End If
+        Else
+            ' Use the Latex kludge. We don't have banner images at the bottom.
+            If spaceUsedInColumn(1) = 0 And spaceUsedInColumn(2) = 0 Then
+                desiredPosition = ppTop
+            Else
+                desiredPosition = ppElsewhere
+            End If
+        End If
+    End With
+End Function
+
+Private Property Get CurrentColumn() As Integer
+    CurrentColumn = clsAnchoredFrame.ColumnNumberFor(workingPosition)
+End Property
+
+Private Property Get CurrentPage() As Integer
+    CurrentPage = workingPosition.Information(wdActiveEndPageNumber)
+End Property
