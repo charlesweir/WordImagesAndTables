@@ -98,20 +98,20 @@ Private Property Get FrameBookmark() As Bookmark
 End Property
 
 Private Property Get FirstCaption() As Range
-    ' Answers the text (not numbering) part of the first caption in the frame.
+    ' Answers full paragraph that is the first caption in the frame.
     Dim para As Paragraph
     For Each para In myFrame.TextFrame.TextRange.Paragraphs
         If para.style = "Caption" Then GoTo FoundPara ' Could be Like, if several caption types
     Next para: Debug.Assert False ' No caption found
 FoundPara:
     Set FirstCaption = para.Range
-    FirstCaption.Collapse
-    FirstCaption.MoveWhile " FigureTabl" ' Skip the Figure or table part
-    Do While FirstCaption.Information(wdInFieldCode)
-        FirstCaption.Move wdCharacter
-    Loop
-    FirstCaption.MoveEnd wdParagraph
-    FirstCaption.MoveEnd wdCharacter, -1 ' Not cr at end.
+    'FirstCaption.Collapse
+    'FirstCaption.MoveWhile " FigureTabl" ' Skip the Figure or table part
+    'Do While FirstCaption.Information(wdInFieldCode)
+    '    FirstCaption.Move wdCharacter
+    'Loop
+    'FirstCaption.MoveEnd wdParagraph
+    'FirstCaption.MoveEnd wdCharacter, -1 ' Not cr at end.
 End Property
 
 Public Property Get Name() As String
@@ -181,28 +181,69 @@ Public Sub InitWithNewFrameAt(oRng As Range, autotextName As String)
 End Sub
 
 Private Sub InsertCrossReferenceBesideAnchor()
-    Dim oldCaption As String
-    oldCaption = FirstCaption.Text
-    FirstCaption.Text = "TAG" & Int(99999999 * Rnd)
+    Dim tag As String
+    tag = "TAG" & Int(99999999 * Rnd)
+    
+    ' Remember where the caption was.
+    Dim captionLocation As Range
+    Set captionLocation = FirstCaption
+    captionLocation.InsertAfter (vbCrLf)
+    captionLocation.Collapse
+
+    ' Move the caption para into the main document and tag it
+    Dim theCaption As Range
+    Set theCaption = FirstCaption
+    theCaption.Cut
+    Set theCaption = ActiveDocument.Content
+    theCaption.Collapse wdCollapseEnd
+    theCaption.InsertBefore vbCrLf
+    theCaption.Collapse wdCollapseEnd
+    theCaption.Paste
+    Dim tagLocation As Range
+    Set tagLocation = theCaption
+    tagLocation.Collapse wdCollapseEnd
+    tagLocation.Move wdCharacter, -1
+    tagLocation.InsertAfter tag ' sets tagLocation to the range of the inserted tag
+
+    ' Create the cross reference to it after the anchor:
     Dim items() As String
     items = ActiveDocument.GetCrossReferenceItems("Figure")
     ' Answers an array of strings, "123. Figure 1/ The Caption", plus all the numbered paras etc.
-    
-    Dim item As Variant
-    Dim searchString As String
-    searchString = "*" & FirstCaption.Text & "*"
-    For Each item In items
-        If item Like searchString Then GoTo ItemFound
-    Next item: Debug.Assert False ' Tag not found. Ouch!
+    Dim crossRefItem As Integer
+    For crossRefItem = LBound(items) To UBound(items)
+        If InStr(items(crossRefItem), tag) <> 0 Then GoTo ItemFound
+    Next crossRefItem: Debug.Assert False ' Tag not found. Ouch!
 ItemFound:
 
-        ' Also wdCaptionTable
     Dim afterAnchor As Range
-    afterAnchor.Collapse
+    Set afterAnchor = myFrame.Anchor
+    afterAnchor.Collapse wdCollapseEnd
     
-    afterAnchor.InsertCrossReference ReferenceType:=wdCaptionFigure, ReferenceKind:=wdOnlyLabelAndNumber, ReferenceItem:=item
-    Set RefField = afterAnchor.Fields(1)
-    myFrame.TextFrame.TextRange.Fields.Update
+    afterAnchor.InsertCrossReference ReferenceType:="Figure", ReferenceKind:= _
+        wdOnlyLabelAndNumber, ReferenceItem:="" & crossRefItem, InsertAsHyperlink:=False, _
+        IncludePosition:=False, SeparateNumbers:=False, SeparatorString:=" "
+    
+    afterAnchor.Expand wdSentence
+    Set RefField = afterAnchor.Fields(1) ' Might not actually be correct, but who cares? We only use it for updating...
+    
+    ' There's a bizarre Word error here, where the caption paragraph isn't editable for a bit after the InsertCrossReference command.
+    ' Turns out we can simply wait for Word to sort it out...
+    On Error Resume Next
+    Do
+        DoEvents
+        tagLocation.Delete
+    Loop While Err.Number = 4605 Or Err.Number = 91
+    On Error GoTo 0
+    
+    ' Finally, move the caption para back, and update the fields:
+    theCaption.Expand wdParagraph
+    theCaption.Cut
+    theCaption.Delete wdCharacter, Len(vbCrLf)   ' Ending CRLF?
+    
+    captionLocation.Paste
+    captionLocation.Collapse wdCollapseEnd
+    captionLocation.Delete wdCharacter ' the following empty paragraph.
+    captionLocation.Fields.Update
     myReferencingField.Update
 End Sub
 ' Static
