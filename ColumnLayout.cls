@@ -9,26 +9,28 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
     ' ColumnLayout: Represents the layout for the current column.
 Option Explicit
+Option Base 1 ' Arrays start at one in this module.
 
 Dim workingPage As Integer
-' Dim workingColumn As Integer
-' Dim workingPageStatus As PageFillStatus
-' Dim workingColumnStatus As PageFillStatus
 Dim workingPosition As Range
-Dim clsAnchoredFrame As New anchoredFrame
+Dim clsAnchoredFrame As New AnchoredFrame
 
 Private Enum PossiblePosition
     ppTop = 1 ' Frame at the top
-    ppBottom = 2 ' Frame at the top and the bottom
+    ppBottom = 2 ' Top occupied, so bottom
     ppElsewhere = 3 ' Definitely need to position on the next page.
 End Enum
 
-Dim spaceUsedInColumn(3) As Integer ' 0, 1, 2
+Dim spaceUsedInColumn(2) As Integer ' 1, 2
 
 Sub Initialise()
-    workingPage = 0
+' Set us up for the start of the document. If the range we're processing is elsewhere, the algorithm will sort it out.
+    workingPage = 1
     Set workingPosition = ActiveDocument.Content
     workingPosition.Collapse
+    ' Papers - don't want to position a floating image at the top of the page before the title.
+    spaceUsedInColumn(1) = 1
+    spaceUsedInColumn(2) = 1
 End Sub
 
 Sub CheckForNewPage()
@@ -39,10 +41,10 @@ Sub CheckForNewPage()
         spaceUsedInColumn(2) = 0
     End If
 End Sub
-
-
         
-Sub PositionFrame(newFrame As anchoredFrame)
+Sub PositionFrame(newFrame As AnchoredFrame)
+' Position a single anchored frame as near as possible to its reference field
+
     With newFrame
         If workingPosition.Start < .ReferenceFieldStart.Start Then
             Set workingPosition = .PlaceNearReference
@@ -61,11 +63,8 @@ Sub PositionFrame(newFrame As anchoredFrame)
     
             ' Unless
             '   the anchor is now on a different page number, or Word has misbehaved and put both overlapping anyway.
-            '   Word also seems to behave oddly when there's two frames and only one line of text (and it looks pretty odd too):
-            '   Let's say we we want at least 10% of page for text when there are two frames on the page.
             ' we're done.
-            If Not ((.FramePageNumber > workingPage) _
-                    Or ((spaceUsedInColumn(CurrentColumn) > 0) And (spaceUsedInColumn(CurrentColumn) + .Height > (.UsableDocumentHeight * 0.9)))) Then
+            If .FramePageNumber = workingPage And CanFitInColumn(newFrame, CurrentColumn) Then
                 ' We're done
                 UpdateColumnSpace newFrame
                 Exit Sub
@@ -81,11 +80,11 @@ Sub PositionFrame(newFrame As anchoredFrame)
         Dim nextPage As Range
         startColumn = CurrentColumn
         
-        If .NumColumns = 2 Then
+        If .NumColumns = 2 And .FitsInColumn And startColumn = 1 And CanFitInColumn(newFrame, 2) Then
             While CurrentColumn = startColumn And CurrentPage = workingPage
                 workingPosition.Move wdParagraph
             Wend
-        Else ' Single column
+        Else ' Single column or full-width image
             Set nextPage = workingPosition.GoTo(wdGoToPage, wdGoToNext)
             ' Kludge. The above sometimes goes wrong (but not when stepping through in the debugger):
             If nextPage.Information(wdActiveEndPageNumber) = workingPage + 1 Then
@@ -115,36 +114,46 @@ Sub PositionFrame(newFrame As anchoredFrame)
     End With
 End Sub
 
-Private Sub UpdateColumnSpace(oAnchoredFrame As anchoredFrame)
+Private Function CanFitInColumn(newFrame As AnchoredFrame, columnNum As Integer) As Boolean
+' Answers true if there is space for newFrame in the given column.
+
+' Word may misbehave and put large images overlapping.
+'   Word  seems to behave oddly when there's two frames and only one line of text (and it looks pretty odd too):
+'   Let's say we we want at least 10% of page for text when there are two frames on the page.
+
+    CanFitInColumn = (spaceUsedInColumn(columnNum) = 0) Or _
+            spaceUsedInColumn(columnNum) + newFrame.Height < (newFrame.UsableDocumentHeight * 0.9)
+End Function
+
+Private Sub UpdateColumnSpace(oAnchoredFrame As AnchoredFrame)
     With oAnchoredFrame
         If .FitsInColumn Then ' Single column, or small frame in double column.
             spaceUsedInColumn(CurrentColumn) = IIf(spaceUsedInColumn(CurrentColumn) = 0, .Height, .UsableDocumentHeight)
             Exit Sub
         End If
-  
-        spaceUsedInColumn(1) = .Height
-        spaceUsedInColumn(2) = .Height
+
+        spaceUsedInColumn(1) = IIf(desiredPosition(oAnchoredFrame) = ppTop, .Height, .UsableDocumentHeight)
+        spaceUsedInColumn(2) = spaceUsedInColumn(1)
     End With
 End Sub
 
-Private Function desiredPosition(oAnchoredFrame As anchoredFrame) As PossiblePosition
+Private Function desiredPosition(oAnchoredFrame As AnchoredFrame) As PossiblePosition
     ' Answers where we'd like to place the image (ignoring that it might end up on the following page/column when we try),
     ' given the current workingPosition
+    
+    desiredPosition = ppElsewhere ' default
     With oAnchoredFrame
         If .FitsInColumn Then
             If spaceUsedInColumn(CurrentColumn) = 0 Then
                 desiredPosition = ppTop
             ElseIf spaceUsedInColumn(CurrentColumn) > 0 And spaceUsedInColumn(CurrentColumn) < .UsableDocumentHeight Then
                 desiredPosition = ppBottom
-            Else
-                desiredPosition = ppElsewhere
             End If
         Else
-            ' Use the Latex kludge. We don't have banner images at the bottom.
             If spaceUsedInColumn(1) = 0 And spaceUsedInColumn(2) = 0 Then
                 desiredPosition = ppTop
-            Else
-                desiredPosition = ppElsewhere
+            ElseIf spaceUsedInColumn(1) < .UsableDocumentHeight And spaceUsedInColumn(2) < .UsableDocumentHeight Then
+                desiredPosition = ppBottom
             End If
         End If
     End With
@@ -157,3 +166,4 @@ End Property
 Private Property Get CurrentPage() As Integer
     CurrentPage = workingPosition.Information(wdActiveEndPageNumber)
 End Property
+

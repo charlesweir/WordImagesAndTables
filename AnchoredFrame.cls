@@ -127,7 +127,8 @@ End Property
 Public Property Get FitsInColumn() As Boolean
     ' Does the frame fit in a single column?
     ' Answers true for single column mode in case an image is a little wide for the text.
-    FitsInColumn = (NumColumns = 1) Or (myFrame.Width < CurrentPageSetup.TextColumns.Width)
+    ' And gives a 5% leeway, since there's usually a bit of whitespace in a frame.
+    FitsInColumn = (NumColumns = 1) Or (myFrame.Width < (CurrentPageSetup.TextColumns.Width * 1.05))
 End Property
 
 Public Sub MoveAnchorTo(workingPosition As Range)
@@ -170,14 +171,11 @@ End Sub
        
 Public Sub InitWithNewFrameAt(oRng As Range, autotextName As String)
 ' Set myself up as a a new frame and reference to it, based on the given autotext (Figure or Table)
-    Application.ScreenUpdating = False
     Dim rngInsertedAnchor As Range
     Set rngInsertedAnchor = ActiveDocument.AttachedTemplate.AutoTextEntries(autotextName).Insert(where:=oRng, RichText:=True)
     Debug.Assert rngInsertedAnchor.ShapeRange.count = 1 ' Autotext contains floating frame
     Set Frame = rngInsertedAnchor.ShapeRange(1)
     InsertCrossReferenceBesideAnchor autotextName
-    Application.ScreenUpdating = True
-    Application.ScreenRefresh
 End Sub
 
 Private Sub InsertCrossReferenceBesideAnchor(autotextName As String)
@@ -295,5 +293,60 @@ Public Function ColumnNumberFor(rng As Range) As Integer
         ColumnNumberFor = 2
     End If
 End Function
+       
+' Static
+Function RepositionableFramesInRegion(region As Range) As Collection
+' Answers a collection of relevant AnchoredFrames - ones with references - in the given region.
 
+    Dim oAnchoredFrame As AnchoredFrame
+    Dim allFramesInRegion As Collection
+    Set allFramesInRegion = New Collection
+    
+    Set RepositionableFramesInRegion = New Collection
+    
+    ' First, find all the frames and their hidden cross reference bookmarks:
+    Dim currentFrame As Shape
+    For Each currentFrame In region.ShapeRange
+        Debug.Assert Not currentFrame Is Nothing ' If this fires, Word is still sorting out itself. Wait and try again later.
+        If IsValidFrame(currentFrame) Then
+            Set oAnchoredFrame = New AnchoredFrame
+            Set oAnchoredFrame.Frame = currentFrame
+            allFramesInRegion.Add Item:=oAnchoredFrame, key:=oAnchoredFrame.BookmarkId
+        End If
+    Next
+    
+    ' Now look for the first reference to each of those bookmarks, and construct our collection with them:
+    Dim ReferencingField As field
+    Dim bookmarkName As String
+    Dim previousField As field
+    
+    For Each ReferencingField In region.Fields
+        ' Word can take several minutes to sort the fields after you open a new document.
+        ' If this next assertion fails, get on with something else and come back to do this again later.
+        If Not previousField Is Nothing Then Debug.Assert ReferencingField.Result.Start >= previousField.Result.Start
+        
+        bookmarkName = BookmarkIdFromField(ReferencingField)
+        If bookmarkName <> "" And ContainsKey(allFramesInRegion, bookmarkName) Then
+            Set oAnchoredFrame = allFramesInRegion(bookmarkName)
             
+            ' Only pair references within a section. (I have forward references to figures at the start of my Thesis)
+            If (ReferencingField.Code.Information(wdActiveEndSectionNumber) = oAnchoredFrame.SectionNumber) Then
+                Set oAnchoredFrame.RefField = ReferencingField
+                RepositionableFramesInRegion.Add oAnchoredFrame
+                ' And remove it, so that we ignore later references.
+                allFramesInRegion.Remove bookmarkName
+            End If
+        End If
+        Set previousField = ReferencingField
+    Next ReferencingField
+End Function
+
+' Static
+Private Function ContainsKey(col As Collection, key As String) As Boolean
+' Answers true if Collection col contains key
+    On Error Resume Next
+    col (key) ' Just try it. If it fails, Err.Number will be nonzero.
+    ContainsKey = (Err.Number = 0)
+    Err.Clear
+    On Error GoTo 0 ' Reset
+End Function

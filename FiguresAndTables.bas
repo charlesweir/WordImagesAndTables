@@ -22,10 +22,13 @@ End Sub
 
 Private Sub InsertFrame(frameType As String)
 ' Inserts a frame (Figure or Table) at the current selection point.
-    Dim newAnchoredFrame As anchoredFrame
-    Set newAnchoredFrame = New anchoredFrame
+    Dim newAnchoredFrame As AnchoredFrame
+    Set newAnchoredFrame = New AnchoredFrame
+    Application.ScreenUpdating = False
     newAnchoredFrame.InitWithNewFrameAt Selection.Range, frameType
     newAnchoredFrame.Update
+    Application.ScreenUpdating = True
+    Application.ScreenRefresh
 End Sub
 
 Static Sub PreserveImageCroppingAndSizing(IsPaste)
@@ -107,6 +110,7 @@ Sub RepositionFloatingImage()
     With myShape
         If Selection.Sections(1).pageSetup.TextColumns.count > 1 Then
             ' Column layout. In column if small enough, else page. Toggle top/bottom
+            Dim MaxSingleColumnImageWidth As Single
             MaxSingleColumnImageWidth = Selection.Sections(1).pageSetup.TextColumns.Width ' + Selection.Sections(1).pageSetup.TextColumns.Spacing
             .WrapFormat.Type = wdWrapTopBottom
             If .Width > MaxSingleColumnImageWidth Then
@@ -123,6 +127,7 @@ Sub RepositionFloatingImage()
             End If
         Else
             ' One column.
+            Dim HalfPageWidth As Single
             HalfPageWidth = Selection.Sections(1).pageSetup.TextColumns.Width / 2
             If .Width < HalfPageWidth Then
                 'Small picture. Put near anchor, wrap around. Toggle left/right
