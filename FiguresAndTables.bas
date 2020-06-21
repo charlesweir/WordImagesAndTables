@@ -9,10 +9,23 @@ Attribute VB_Name = "FiguresAndTables"
 '
 'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '
+Option Explicit
+
 Sub InsertFigure()
+' Inserts a floating figure and reference to it.
+    InsertFrame "Figure"
+End Sub
+Sub InsertTable()
+' Inserts a floating table and reference to it.
+    InsertFrame "Table"
+End Sub
+
+Private Sub InsertFrame(frameType As String)
+' Inserts a frame (Figure or Table) at the current selection point.
     Dim newAnchoredFrame As anchoredFrame
     Set newAnchoredFrame = New anchoredFrame
-    newAnchoredFrame.InitWithNewFrameAt Selection.Range, "figure"
+    newAnchoredFrame.InitWithNewFrameAt Selection.Range, frameType
+    newAnchoredFrame.Update
 End Sub
 
 Static Sub PreserveImageCroppingAndSizing(IsPaste)

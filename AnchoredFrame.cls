@@ -105,13 +105,6 @@ Private Property Get FirstCaption() As Range
     Next para: Debug.Assert False ' No caption found
 FoundPara:
     Set FirstCaption = para.Range
-    'FirstCaption.Collapse
-    'FirstCaption.MoveWhile " FigureTabl" ' Skip the Figure or table part
-    'Do While FirstCaption.Information(wdInFieldCode)
-    '    FirstCaption.Move wdCharacter
-    'Loop
-    'FirstCaption.MoveEnd wdParagraph
-    'FirstCaption.MoveEnd wdCharacter, -1 ' Not cr at end.
 End Property
 
 Public Property Get Name() As String
@@ -168,26 +161,40 @@ Public Sub SetToFloatAt(topOrBottom As Long)
         If .Top <> topOrBottom Then .Top = topOrBottom
     End With
 End Sub
+
+Public Sub Update()
+    ' Updates all fields in the frame, and the anchor field.
+    myFrame.TextFrame.TextRange.Fields.Update
+    myReferencingField.Update
+End Sub
        
-' Static
 Public Sub InitWithNewFrameAt(oRng As Range, autotextName As String)
-    ' Create a new frame and reference to it at the given point by inserting the specified autotext (which must be a floating frame)
-    ' ToDo Can't get word to omit the caption from the
+' Set myself up as a a new frame and reference to it, based on the given autotext (Figure or Table)
+    Application.ScreenUpdating = False
     Dim rngInsertedAnchor As Range
     Set rngInsertedAnchor = ActiveDocument.AttachedTemplate.AutoTextEntries(autotextName).Insert(where:=oRng, RichText:=True)
     Debug.Assert rngInsertedAnchor.ShapeRange.count = 1 ' Autotext contains floating frame
     Set Frame = rngInsertedAnchor.ShapeRange(1)
-    InsertCrossReferenceBesideAnchor
+    InsertCrossReferenceBesideAnchor autotextName
+    Application.ScreenUpdating = True
+    Application.ScreenRefresh
 End Sub
 
-Private Sub InsertCrossReferenceBesideAnchor()
+Private Sub InsertCrossReferenceBesideAnchor(autotextName As String)
+' Inserts a reference field, such as "Figure 2" or "Table 7", just after the anchor.
+'
+' Word VBA doesn't support cross references to text in text frames (not text boxes), so we
+' move the caption to the main document, create the reference, then move it back again.
+'
+' To find the caption in the list of cross-referenceable items, we add a random tag to it.
+
     Dim tag As String
     tag = "TAG" & Int(99999999 * Rnd)
     
     ' Remember where the caption was.
     Dim captionLocation As Range
     Set captionLocation = FirstCaption
-    captionLocation.InsertAfter (vbCrLf)
+    If autotextName = "Figure" Then captionLocation.InsertAfter (vbCrLf)
     captionLocation.Collapse
 
     ' Move the caption para into the main document and tag it
@@ -207,7 +214,7 @@ Private Sub InsertCrossReferenceBesideAnchor()
 
     ' Create the cross reference to it after the anchor:
     Dim items() As String
-    items = ActiveDocument.GetCrossReferenceItems("Figure")
+    items = ActiveDocument.GetCrossReferenceItems(autotextName)
     ' Answers an array of strings, "123. Figure 1/ The Caption", plus all the numbered paras etc.
     Dim crossRefItem As Integer
     For crossRefItem = LBound(items) To UBound(items)
@@ -219,14 +226,14 @@ ItemFound:
     Set afterAnchor = myFrame.Anchor
     afterAnchor.Collapse wdCollapseEnd
     
-    afterAnchor.InsertCrossReference ReferenceType:="Figure", ReferenceKind:= _
+    afterAnchor.InsertCrossReference ReferenceType:=autotextName, ReferenceKind:= _
         wdOnlyLabelAndNumber, ReferenceItem:="" & crossRefItem, InsertAsHyperlink:=False, _
         IncludePosition:=False, SeparateNumbers:=False, SeparatorString:=" "
     
     afterAnchor.Expand wdSentence
     Set RefField = afterAnchor.Fields(1) ' Might not actually be correct, but who cares? We only use it for updating...
     
-    ' There's a bizarre Word error here, where the caption paragraph isn't editable for a bit after the InsertCrossReference command.
+    ' There's a bizarre Word error here, where the caption paragraph isn't editable for a short time after the InsertCrossReference command.
     ' Turns out we can simply wait for Word to sort it out...
     On Error Resume Next
     Do
@@ -235,30 +242,30 @@ ItemFound:
     Loop While Err.Number = 4605 Or Err.Number = 91
     On Error GoTo 0
     
-    ' Finally, move the caption para back, and update the fields:
+    ' Finally, move the caption para back, and tidy up.
     theCaption.Expand wdParagraph
     theCaption.Cut
-    theCaption.Delete wdCharacter, Len(vbCrLf)   ' Ending CRLF?
-    
+    theCaption.Delete wdCharacter, Len(vbCrLf)   ' Ending CRLF
     captionLocation.Paste
+    ' In the case of the table, we somehow lose the caption style (not sure why). Just put it back.
+    captionLocation.style = "Caption"
     captionLocation.Collapse wdCollapseEnd
     captionLocation.Delete wdCharacter ' the following empty paragraph.
-    captionLocation.Fields.Update
-    myReferencingField.Update
 End Sub
 ' Static
 Public Function IsValidFrame(shp As Shape) As Boolean
     ' Is this a text frame containing a caption that we need to layout?
-    If shp.Type <> msoTextBox Then IsValidFrame = False: Exit Function
+    IsValidFrame = False
+    If shp.Type <> msoTextBox Then Exit Function
     
     ' Don't layout frames aligned left or right.
-    If shp.Left = wdShapeLeft Or shp.Left = wdShapeRight Then IsValidFrame = False: Exit Function
+    If shp.Left = wdShapeLeft Or shp.Left = wdShapeRight Then Exit Function
     
     Dim bookmarkSet As Bookmarks
     Set bookmarkSet = shp.TextFrame.TextRange.Bookmarks
     bookmarkSet.ShowHidden = True
-    If bookmarkSet.count = 0 Then IsValidFrame = False: Exit Function
-    If Not bookmarkSet(1).Name Like "_Ref##*" Then IsValidFrame = False: Exit Function
+    If bookmarkSet.count = 0 Then Exit Function
+    If Not bookmarkSet(1).Name Like "_Ref##*" Then Exit Function
     
     IsValidFrame = True
 End Function
@@ -266,8 +273,9 @@ End Function
 ' Static
 Public Function BookmarkIdFromField(fld As field) As String
     ' If this field is a reference to a caption, answers the reference key, else null string.
-    If fld.Type <> wdFieldRef Then BookmarkIdFromField = "": Exit Function
-    If Not fld.Code.Text Like "* REF _Ref##* *" Then BookmarkIdFromField = "": Exit Function
+    BookmarkIdFromField = ""
+    If fld.Type <> wdFieldRef Then Exit Function
+    If Not fld.Code.Text Like "* REF _Ref##* *" Then Exit Function
     BookmarkIdFromField = Split(fld.Code.Text, " ")(2)
 End Function
  
