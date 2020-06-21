@@ -31,7 +31,8 @@ Sub ActionTests()
             End If
         Next
         
-        LayoutFloatingImages.LayoutFloatingImagesFor oRangeTested
+        ' Can't just call this on mac if the template file is in the Startup directory.
+        Application.Run "LayoutFloatingImages.LayoutFloatingImagesFor", oRangeTested
         
         For Each x In tests
             If Not (x Like "Figure *" Or x Like "Table *") Then GoTo NextX ' There's no continue in this version of VBA
@@ -42,8 +43,7 @@ Sub ActionTests()
             expectedColumn = Split(x, ";")(2)           ' E.g. 2
             expectedFirstParaOnPage = Split(x, ";")(3)  ' E.g  12
             
-            Debug.Assert ContainsKey(myFrames, expectedName)
-            Set shp = myFrames(expectedName)
+            Set shp = myFrames(expectedName) ' May fail if we've lost that frame.
             
             actualColumn = "" & ColumnNumber(shp.Anchor)
             Debug.Assert actualColumn = expectedColumn
@@ -80,13 +80,7 @@ Private Function ColumnNumber(rng As Range) As Integer
         ColumnNumber = 2
     End If
 End Function
-Private Function ContainsKey(col As Collection, key As String) As Boolean
-    On Error Resume Next
-    col (key) ' Just try it. If it fails, Err.Number will be nonzero.
-    ContainsKey = (Err.Number = 0)
-    Err.Clear
-    On Error GoTo 0 ' Reset
-End Function
+
 
 Private Sub ShowStatusBarMessage(message As String)
     If message = "" Then
