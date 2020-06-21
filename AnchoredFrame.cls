@@ -234,12 +234,13 @@ ItemFound:
     Set RefField = afterAnchor.Fields(1) ' Might not actually be correct, but who cares? We only use it for updating...
     
     ' There's a bizarre Word error here, where the caption paragraph isn't editable for a short time after the InsertCrossReference command.
-    ' Turns out we can simply wait for Word to sort it out...
+    ' Turns out in Windows we can simply wait for Word to sort it out...
     On Error Resume Next
     Do
         DoEvents
         tagLocation.Delete
-    Loop While Err.Number = 4605 Or Err.Number = 91
+        Debug.Assert Err.Number = 4605 Or Err.Number = 5904 Or Err.Number = 0 ' or 91?  4605 is Windows, 5904 is Mac, but doesn't seem to clear - Ignore it.
+    Loop While Err.Number = 4605
     On Error GoTo 0
     
     ' Finally, move the caption para back, and tidy up.
