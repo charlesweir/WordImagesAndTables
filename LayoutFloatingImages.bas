@@ -8,29 +8,44 @@ Attribute VB_Name = "LayoutFloatingImages"
 'The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 '
 'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 Option Explicit ' All variables must be defined.
 
 
 Sub LayoutFloatingImages()
+    ' Lays out all the anchored frames in the document
     LayoutFloatingImagesFor ActiveDocument.StoryRanges(wdMainTextStory)
 End Sub
 
-Public Sub LayoutFloatingImagesFor(region As Range)
-    ' Moves every text frame containing a captioned Image or Table to be anchored at its first reference.
+Public Function ImagesToLayoutInDocument() As Collection
+    ' Answers a collection of all the AnchoredFrame objects needing layout in the current document.
     
-    ShowStatusBarMessage ("Analysing frames to reposition")
-    Dim clsAnchoredFrame As New AnchoredFrame
-    Dim oAnchoredFrame As AnchoredFrame
-    Dim myFramesToLayout As Collection
-    
-    Set myFramesToLayout = clsAnchoredFrame.RepositionableFramesInRegion(region)
+    ' Collects the frames we want to reposition, and the locations of their first relevant reference:
 
-    ' OK. So now we have all the frames we want to reposition, and the locations of their first relevant reference:
+    Dim clsAnchoredFrame As New AnchoredFrame
+    ShowStatusBarMessage ("Analysing frames to reposition")
+    Set ImagesToLayoutInDocument = clsAnchoredFrame.RepositionableFramesInRegion(ActiveDocument.StoryRanges(wdMainTextStory))
+End Function
+
+Public Sub LayoutFloatingImagesFor(region As Range)
+    ' Re-lays out all the AnchoredFrames in the given region
+    
+    Dim imagesToLayout As Collection
+    Dim clsAnchoredFrame As New AnchoredFrame
+    Set imagesToLayout = clsAnchoredFrame.RepositionableFramesInRegion(region)
+    LayoutTheseFloatingImages imagesToLayout
+End Sub
+
+Public Sub LayoutTheseFloatingImages(myFramesToLayout As Collection)
+    ' Repositions each of the given AnchoredFrames according, roughly, to the Latex rules.
+    
+    Dim oAnchoredFrame As AnchoredFrame
+
     ' Move the frames to the end of the document.
     
     Application.ScreenUpdating = False
     For Each oAnchoredFrame In myFramesToLayout
-        ShowStatusBarMessage ("Stashing " & oAnchoredFrame.Name & " of " & myFramesToLayout.count)
+        ShowStatusBarMessage ("Stashing " & oAnchoredFrame.Name & " of " & myFramesToLayout.Count)
         oAnchoredFrame.Stash
     Next oAnchoredFrame
     Application.ScreenUpdating = True
@@ -48,7 +63,7 @@ Public Sub LayoutFloatingImagesFor(region As Range)
     Next oAnchoredFrame
     
     EmptyCutBuffer
-    ShowStatusBarMessage ("Repositioned " & myFramesToLayout.count & " frames")
+    ShowStatusBarMessage ("Repositioned " & myFramesToLayout.Count & " frames")
 End Sub
 
 Private Sub EmptyCutBuffer()

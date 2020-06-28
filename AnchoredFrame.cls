@@ -50,7 +50,7 @@ End Property
 
 Public Property Get NumColumns() As Integer
     ' Answers the number of text columns on the page (1 or 2)
-    NumColumns = CurrentPageSetup.TextColumns.count
+    NumColumns = CurrentPageSetup.TextColumns.Count
     Debug.Assert NumColumns <= 2
 End Property
 
@@ -85,7 +85,7 @@ Public Property Get FirstParaOnSamePage() As Range
     ' Answers the first location at the top of the page containing the frame.
     Dim firstPara As Range
     Set firstPara = myFrame.Anchor
-    Set FirstParaOnSamePage = firstPara.GoTo(What:=wdGoToPage, count:=myFrame.Anchor.Information(wdActiveEndPageNumber))
+    Set FirstParaOnSamePage = firstPara.GoTo(What:=wdGoToPage, Count:=myFrame.Anchor.Information(wdActiveEndPageNumber))
 End Property
  
 Private Property Get FrameBookmark() As Bookmark
@@ -93,7 +93,7 @@ Private Property Get FrameBookmark() As Bookmark
     Dim bookmarkSet As Bookmarks
     Set bookmarkSet = myFrame.TextFrame.TextRange.Bookmarks
     bookmarkSet.ShowHidden = True
-    Debug.Assert bookmarkSet.count > 0 And bookmarkSet(1).Name Like "_Ref##*"
+    Debug.Assert bookmarkSet.Count > 0 And bookmarkSet(1).Name Like "_Ref##*"
     Set FrameBookmark = bookmarkSet(1)
 End Property
 
@@ -172,8 +172,8 @@ End Sub
 Public Sub InitWithNewFrameAt(oRng As Range, autotextName As String)
 ' Set myself up as a a new frame and reference to it, based on the given autotext (Figure or Table)
     Dim rngInsertedAnchor As Range
-    Set rngInsertedAnchor = ActiveDocument.AttachedTemplate.AutoTextEntries(autotextName).Insert(where:=oRng, RichText:=True)
-    Debug.Assert rngInsertedAnchor.ShapeRange.count = 1 ' Autotext contains floating frame
+    Set rngInsertedAnchor = ActiveDocument.AttachedTemplate.AutoTextEntries(LCase(autotextName)).Insert(where:=oRng, RichText:=True)
+    Debug.Assert rngInsertedAnchor.ShapeRange.Count = 1 ' Autotext contains floating frame
     Set Frame = rngInsertedAnchor.ShapeRange(1)
     InsertCrossReferenceBesideAnchor autotextName
 End Sub
@@ -263,7 +263,7 @@ Public Function IsValidFrame(shp As Shape) As Boolean
     Dim bookmarkSet As Bookmarks
     Set bookmarkSet = shp.TextFrame.TextRange.Bookmarks
     bookmarkSet.ShowHidden = True
-    If bookmarkSet.count = 0 Then Exit Function
+    If bookmarkSet.Count = 0 Then Exit Function
     If Not bookmarkSet(1).Name Like "_Ref##*" Then Exit Function
     
     IsValidFrame = True
@@ -287,7 +287,7 @@ Public Function ColumnNumberFor(rng As Range) As Integer
     Dim ps As pageSetup
     Set ps = ActiveDocument.Sections(rng.Information(wdActiveEndSectionNumber)).pageSetup
     
-    If ps.TextColumns.count > 1 And _
+    If ps.TextColumns.Count > 1 And _
             rng.Information(wdHorizontalPositionRelativeToPage) > rng.Information(wdHorizontalPositionRelativeToTextBoundary) + _
                     ps.LeftMargin + 1 Then
         ColumnNumberFor = 2
