@@ -4,10 +4,9 @@
 			<tab idMso="TabPageLayoutWord">
 				<group id="figuresAndTables" label="Figures and Tables" insertAfterMso="GroupArrange">
 					<button id="Figure" label="New Figure" size="normal" imageMso="DiagramShapeInsertClassic" onAction="FiguresAndTables.ButtonPressed" />
-					<button id="CopyFormat" label="Copy Layout" size="normal" imageMso="Copy" onAction="FiguresAndTables.ButtonPressed" />
+					<button id="ChangePicture" label="Change Picture" size="normal" imageMso="PictureChange" onAction="FiguresAndTables.ButtonPressed" />
 					<button id="Reposition" label="Reposition" size="normal" imageMso="PicturePositionGallery" onAction="FiguresAndTables.ButtonPressed" />
 					<button id="Table" label="New Table" size="normal" imageMso="AdpDiagramAddTable" onAction="FiguresAndTables.ButtonPressed" />
-					<button id="PasteFormat" label="Paste Layout" size="normal" imageMso="Paste" onAction="FiguresAndTables.ButtonPressed" />
 					<button id="RelayoutDocument" label="Relayout Document" size="normal" imageMso="PositionAnchoringGallery" onAction="FiguresAndTables.ButtonPressed" />
 				</group>
 			</tab>

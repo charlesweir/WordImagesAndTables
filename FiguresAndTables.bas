@@ -26,12 +26,18 @@ Sub ButtonPressed(control As IRibbonControl)
         End If
         RepositionFloatingImage
         
-    Case "CopyFormat", "PasteFormat"
-        If Selection.InlineShapes.Count = 0 Then
+    Case "ChangePicture"
+        Dim OK As Boolean
+        OK = False ' No ElseIf construct in this version of VBA
+        If Selection.InlineShapes.Count <> 0 Then
+            If Selection.InlineShapes(1).Type = wdInlineShapePicture Then OK = True
+        End If
+        If Not OK Then
             MsgBox "Please select an inline shape first", vbOKOnly
             Exit Sub
         End If
-        PreserveImageCroppingAndSizing (control.ID = "PasteFormat")
+        
+        ChangePicture
         
     Case "RelayoutDocument"
         Dim framesToLayout As Collection
@@ -70,6 +76,19 @@ Sub PasteImageFormat()
     PreserveImageCroppingAndSizing (True)
 End Sub
 
+Private Sub ChangePicture()
+' Changes the selected image to a new one chosen by the user, preserving size and cropping
+    PreserveImageCroppingAndSizing (False)
+    Application.FileDialog(msoFileDialogOpen).AllowMultiSelect = False
+    If Application.FileDialog(msoFileDialogOpen).Show = 0 Then Exit Sub
+    
+    ' This deletes the old image. The selection ends up somewhere after the new image.
+    Selection.InlineShapes.AddPicture FileName:=Application.FileDialog(msoFileDialogOpen).SelectedItems(1), LinkToFile:=False, SaveWithDocument:=True
+    ' So select the new image:
+    Selection.GoToPrevious wdGoToGraphic
+    Selection.Expand wdCharacter
+    PreserveImageCroppingAndSizing (True)
+End Sub
 Private Sub InsertFrame(frameType As String)
 ' Inserts a frame (Figure or Table) at the current selection point.
     Dim newAnchoredFrame As AnchoredFrame
