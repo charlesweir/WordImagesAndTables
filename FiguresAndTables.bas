@@ -20,7 +20,7 @@ Sub ButtonPressed(control As IRibbonControl)
         InsertFrame (control.ID)
         
     Case "Reposition"
-        If Selection.ShapeRange.Count = 0 Then
+        If SelectedFloatingShape Is Nothing Then
             MsgBox "Please select a floating image, shape or textbox first."
             Exit Sub
         End If
@@ -137,10 +137,8 @@ Sub RepositionFloatingImage()
 '
 
     Dim AnchorParagraph As Paragraph
-    
-    Debug.Assert Selection.ShapeRange.Count > 0
 
-    With Selection.ShapeRange(1)
+    With SelectedFloatingShape
         If Selection.Sections(1).pageSetup.TextColumns.Count > 1 Then
             ' Column layout. In column if small enough, else page. Toggle top/bottom
             Dim MaxSingleColumnImageWidth As Single
@@ -192,3 +190,24 @@ Sub RepositionFloatingImage()
 
 End Sub
 
+Function SelectedFloatingShape() As Shape
+    ' Answers the floating shape intended by the user
+    ' either a selected floating shape or frame, or a text frame containing the cursor
+    If Selection.ShapeRange.Count > 0 Then
+        Set SelectedFloatingShape = Selection.ShapeRange(1)
+        Exit Function
+    End If
+    
+    ' Find the text frame containing the selection. No easy way I've found...
+    Dim currentFrame As Shape
+    For Each currentFrame In ActiveDocument.StoryRanges(wdMainTextStory).ShapeRange
+        If currentFrame.Type = msoTextBox Then
+            If Selection.inRange(currentFrame.TextFrame.TextRange) Then
+                Set SelectedFloatingShape = currentFrame
+                Exit Function
+            End If
+        End If
+    Next currentFrame
+    
+    Set SelectedFloatingShape = Nothing
+End Function

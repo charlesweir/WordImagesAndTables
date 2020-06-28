@@ -304,7 +304,7 @@ Function RepositionableFramesInRegion(region As Range) As Collection
     
     Set RepositionableFramesInRegion = New Collection
     
-    ' First, find all the frames and their hidden cross reference bookmarks:
+    ' First, find all the text frames
     Dim currentFrame As Shape
     For Each currentFrame In region.ShapeRange
         Debug.Assert Not currentFrame Is Nothing ' If this fires, Word is still sorting out itself. Wait and try again later.

@@ -118,7 +118,7 @@ Private Function CanFitInColumn(newFrame As AnchoredFrame, columnNum As Integer)
 ' Answers true if there is space for newFrame in the given column.
 
 ' Word may misbehave and put large images overlapping.
-'   Word  seems to behave oddly when there's two frames and only one line of text (and it looks pretty odd too):
+'   Word also seems to behave oddly when there's two frames and only one line of text (and it looks pretty odd too):
 '   Let's say we we want at least 10% of page for text when there are two frames on the page.
 
     CanFitInColumn = (spaceUsedInColumn(columnNum) = 0) Or _
