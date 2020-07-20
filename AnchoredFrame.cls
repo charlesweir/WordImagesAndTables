@@ -10,6 +10,7 @@ Attribute VB_Exposed = False
 ' AnchoredFrame:
 ' A Floating Frame containing an caption (Figure or Table), plus the main reference in the document to that caption.
 Option Explicit
+Option Compare Text ' Like operator is case insensitive
 
 Private myFrame As Shape
 Private myReferencingField As field
@@ -168,11 +169,20 @@ Public Sub Update()
     myFrame.TextFrame.TextRange.Fields.Update
     myReferencingField.Update
 End Sub
-       
+Private Function ThisTemplate() As Template
+    ' Answers the template file containing the autotext entries. Have to use name, since asking about code names leads to permission errors.
+    For Each ThisTemplate In Application.Templates
+        If ThisTemplate.Name Like "WordSupport.dotm" Then Exit Function
+    Next ThisTemplate
+    Debug.Assert False ' Not found the template
+End Function
+
 Public Sub InitWithNewFrameAt(oRng As Range, autotextName As String)
 ' Set myself up as a a new frame and reference to it, based on the given autotext (Figure or Table)
     Dim rngInsertedAnchor As Range
-    Set rngInsertedAnchor = ActiveDocument.AttachedTemplate.AutoTextEntries(LCase(autotextName)).Insert(where:=oRng, RichText:=True)
+    'Debug.Print "ActiveDocument.AttachedTemplate.AutoTextEntries"
+    Set rngInsertedAnchor = ThisTemplate.AutoTextEntries(LCase(autotextName)).Insert(where:=oRng, RichText:=True)
+    'Debug.Print "Done"
     Debug.Assert rngInsertedAnchor.ShapeRange.Count = 1 ' Autotext contains floating frame
     Set Frame = rngInsertedAnchor.ShapeRange(1)
     InsertCrossReferenceBesideAnchor autotextName
@@ -204,6 +214,7 @@ Private Sub InsertCrossReferenceBesideAnchor(autotextName As String)
     theCaption.InsertBefore vbCrLf
     theCaption.Collapse wdCollapseEnd
     theCaption.Paste
+    
     Dim tagLocation As Range
     Set tagLocation = theCaption
     tagLocation.Collapse wdCollapseEnd
@@ -212,8 +223,10 @@ Private Sub InsertCrossReferenceBesideAnchor(autotextName As String)
 
     ' Create the cross reference to it after the anchor:
     Dim items() As String
+    'Debug.Print "ActiveDocument.GetCrossReferenceItems"
     items = ActiveDocument.GetCrossReferenceItems(autotextName)
     ' Answers an array of strings, "123. Figure 1/ The Caption", plus all the numbered paras etc.
+    'Debug.Print "Done"
     Dim crossRefItem As Integer
     For crossRefItem = LBound(items) To UBound(items)
         If InStr(items(crossRefItem), tag) <> 0 Then GoTo ItemFound
