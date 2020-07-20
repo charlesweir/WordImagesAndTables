@@ -78,17 +78,44 @@ End Sub
 
 Private Sub ChangePicture()
 ' Changes the selected image to a new one chosen by the user, preserving size and cropping
+
     PreserveImageCroppingAndSizing (False)
-    Application.FileDialog(msoFileDialogOpen).AllowMultiSelect = False
-    If Application.FileDialog(msoFileDialogOpen).Show = 0 Then Exit Sub
+    Dim sFileName As String
     
+    #If Mac Then
+    
+    Dim sMacScript As String
+    sMacScript = "try " & vbNewLine & _
+        "set theFile to (choose file " & _
+        "with prompt ""Please select a file or files"" default location  """ & _
+        ActiveDocument.Path & """ multiple selections allowed false) as string" & vbNewLine & _
+        "on error errStr number errorNumber" & vbNewLine & _
+        "return errorNumber " & vbNewLine & _
+        "end try " & vbNewLine & _
+        "return POSIX path of (theFile as text)"
+        
+    sFileName = MacScript(sMacScript)
+    
+    ' Errors are returned as negative numbers:
+    If sFileName Like "-*" Then Exit Sub
+    
+    #Else
+    
+        Application.FileDialog(msoFileDialogOpen).AllowMultiSelect = False
+        If Application.FileDialog(msoFileDialogOpen).Show = 0 Then Exit Sub
+        sFileName = Application.FileDialog(msoFileDialogOpen).SelectedItems(1)
+
+    #End If
+
     ' This deletes the old image. The selection ends up somewhere after the new image.
-    Selection.InlineShapes.AddPicture FileName:=Application.FileDialog(msoFileDialogOpen).SelectedItems(1), LinkToFile:=False, SaveWithDocument:=True
+    Selection.InlineShapes.AddPicture FileName:=sFileName, LinkToFile:=False, SaveWithDocument:=True
+
     ' So select the new image:
     Selection.GoToPrevious wdGoToGraphic
     Selection.Expand wdCharacter
     PreserveImageCroppingAndSizing (True)
 End Sub
+
 Private Sub InsertFrame(frameType As String)
 ' Inserts a frame (Figure or Table) at the current selection point.
     Dim newAnchoredFrame As AnchoredFrame
@@ -209,7 +236,7 @@ Sub RepositionFloatingImage()
 
 End Sub
 
-Function SelectedFloatingShape() As Shape
+Private Function SelectedFloatingShape() As Shape
     ' Answers the floating shape intended by the user
     ' either a selected floating shape or frame, or a text frame containing the cursor
     If Selection.ShapeRange.Count > 0 Then
