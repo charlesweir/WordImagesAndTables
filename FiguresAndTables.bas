@@ -27,6 +27,7 @@ Sub ButtonPressed(control As IRibbonControl)
         RepositionFloatingImage
         
     Case "ChangePicture"
+        Debug.Print "ChangePicture called"
         Dim OK As Boolean
         OK = False ' No ElseIf construct in this version of VBA
         If Selection.InlineShapes.Count <> 0 Then
@@ -76,29 +77,51 @@ Sub PasteImageFormat()
     PreserveImageCroppingAndSizing (True)
 End Sub
 
-Private Sub ChangePicture()
-' Changes the selected image to a new one chosen by the user, preserving size and cropping
-
-    PreserveImageCroppingAndSizing (False)
-    Dim sFileName As String
+Private Static Function MacFileSelectDialog() As String
+    ' Put up a file selection dialog on Mac, remembering the location between calls.
+    ' Answers a string starting "-" on error.
     
-    #If Mac Then
+    Dim sDefaultLocation As String ' Preserved between calls by the function's Static-ness
+
+    If Trim(sDefaultLocation & vbNullString) = vbNullString Then ' Check for every manner of null string...
+        sDefaultLocation = ActiveDocument.Path
+        If sDefaultLocation = vbNullString Then ' Might be a new document with no filename yet.
+            sDefaultLocation = Options.DefaultFilePath(wdDocumentsPath)
+        End If
+    End If
     
     Dim sMacScript As String
     sMacScript = "try " & vbNewLine & _
         "set theFile to (choose file " & _
         "with prompt ""Please select a file or files"" default location  """ & _
-        ActiveDocument.Path & """ multiple selections allowed false) as string" & vbNewLine & _
+        sDefaultLocation & """ multiple selections allowed false) as string" & vbNewLine & _
         "on error errStr number errorNumber" & vbNewLine & _
         "return errorNumber " & vbNewLine & _
         "end try " & vbNewLine & _
         "return POSIX path of (theFile as text)"
         
-    sFileName = MacScript(sMacScript)
+    Debug.Print "Actioning: " & sMacScript
+    MacFileSelectDialog = MacScript(sMacScript)
+    
+    Debug.Print "Returned: " & MacFileSelectDialog
     
     ' Errors are returned as negative numbers:
-    If sFileName Like "-*" Then Exit Sub
+    If MacFileSelectDialog Like "-*" Then Exit Function
     
+    sDefaultLocation = Left(MacFileSelectDialog, InStrRev(MacFileSelectDialog, "/"))
+
+End Function
+
+Private Sub ChangePicture()
+' Changes the selected image to a new one chosen by the user, preserving size and cropping
+    PreserveImageCroppingAndSizing (False)
+    Dim sFileName As String
+    
+    #If Mac Then
+    
+        sFileName = MacFileSelectDialog
+        If sFileName Like "-*" Then Exit Sub
+        
     #Else
     
         Application.FileDialog(msoFileDialogOpen).AllowMultiSelect = False
