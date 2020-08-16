@@ -15,6 +15,12 @@ Option Explicit
 Sub ButtonPressed(control As IRibbonControl)
     'Callback when a button is pressed on the Ribbon
     
+    Dim objUndo As UndoRecord ' Combines all undo information for this activity into one.
+    
+    'Begin the custom undo record and provide a name for the record
+    Set objUndo = Application.UndoRecord
+    objUndo.StartCustomRecord (control.ID)
+
     Select Case control.ID
     Case "Figure", "Table"
         InsertFrame (control.ID)
@@ -53,6 +59,9 @@ Sub ButtonPressed(control As IRibbonControl)
         Debug.Assert False ' Unexpected button ID
     End Select
 
+    'End the custom undo record
+    objUndo.EndCustomRecord
+    
 End Sub
 
 
@@ -93,7 +102,7 @@ Private Static Function MacFileSelectDialog() As String
     Dim sMacScript As String
     sMacScript = "try " & vbNewLine & _
         "set theFile to (choose file " & _
-        "with prompt ""Please select a file or files"" default location  """ & _
+        "with prompt ""Please select a file"" default location  """ & _
         sDefaultLocation & """ multiple selections allowed false) as string" & vbNewLine & _
         "on error errStr number errorNumber" & vbNewLine & _
         "return errorNumber " & vbNewLine & _
