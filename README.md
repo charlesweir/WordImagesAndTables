@@ -1,5 +1,5 @@
 # WordSupport
-Microsoft Word VBA Macros and autotext to add missing features.
+Microsoft Word VBA Macros and autotext to support better image layout.
 
 Download the latest release [here](https://github.com/charlesweir/WordSupport/releases/download/V1.2/ReleaseV1.2.zip)
 

@@ -87,14 +87,14 @@ Sub PasteImageFormat()
 End Sub
 
 Private Static Function MacFileSelectDialog() As String
-    ' Put up a file selection dialog on Mac, remembering the location between calls.
+    ' Puts up a file selection dialog on Mac, remembering the location between calls.
     ' Answers a string starting "-" on error.
     
     Dim sDefaultLocation As String ' Preserved between calls by the function's Static-ness
 
     If Trim(sDefaultLocation & vbNullString) = vbNullString Then ' Check for every manner of null string...
         sDefaultLocation = ActiveDocument.Path
-        If sDefaultLocation = vbNullString Then ' Might be a new document with no filename yet.
+        If (sDefaultLocation = vbNullString) Or (sDefaultLocation Like "http*") Then ' New document with no filename, or online document?
             sDefaultLocation = Options.DefaultFilePath(wdDocumentsPath)
         End If
     End If
