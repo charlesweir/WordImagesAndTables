@@ -68,8 +68,9 @@ End Sub
 
 Private Sub EmptyCutBuffer()
     ' Empty cut buffer to stop extra "Do you want to save clipboard?" on exit
-    Dim aDataObject As New DataObject
-    aDataObject.SetText Text:=" " ' For Mac - don't ask!
+    Dim aDataObject As DataObject
+    Set aDataObject = New DataObject
+    aDataObject.SetText Text:=" "   ' For Mac - don't ask!
     aDataObject.PutInClipboard
 End Sub
 
