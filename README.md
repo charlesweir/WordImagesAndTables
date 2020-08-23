@@ -1,12 +1,8 @@
-# Image, Table and Reference Support for Microsoft Word
+# Excellent Microsoft Word Plug-in for Images and Tables
 
-Make Microsoft Word support images, tables, links and bibliographies properly!
+This plug-in makes Word into a desktop publisher, making it easy to put images and tables in frames and laying them out automatically. 
 
-# Why Use this Package?
-
-Microsoft Word is pretty poor at positioning images and tables. Normally you have to position images manually; captions don't work very well; and when you add text or change anything, everything ends up in a mess.
-
-But it doesn't have to be like that. Other word processing packages are rather good at positioning images and tables: Latex users point with pride at its clever image positioning; FrameMaker flows everything around pictures. But Microsoft Word is programmable, so why not make Word do the same?
+On its own, Microsoft Word is pretty poor at positioning images and tables. Normally you have to position images manually; captions don't work very well; and when you add text or change anything, everything ends up in a mess. But it doesn't have to be like that. Other word processing packages are rather good at positioning images and tables: Latex users point with pride at its clever image positioning; FrameMaker flows everything around pictures. But Microsoft Word is programmable, so why not make Word do the same?
 
 This add-in does just that. It makes it easy to insert pictures and tables within frames, and lays out all those frames in your document in a pleasing way so that each frame is as close as possible to the main reference to it, without being constrained to be on the same page.
 
@@ -20,7 +16,7 @@ The plug-in also solves some other frustrations with Word:
 
 The plug-in works on the latest (2020) Microsoft Office installations: that is Word for Windows version 16, and Word for Mac version 16, but not Word 365 online.
 
-# The Functions (and When to Use Them)
+## The Functions (and When to Use Them)
 
 The plug-in creates six new buttons in the *Layout* tab:
 
@@ -39,7 +35,7 @@ The plug-in creates six new buttons in the *Layout* tab:
 
 All the functions support **Undo**, so experiment as much as you like!
 
-# How to Install the Plug-in
+## How to Install the Plug-in
 
 Download the latest release [here](https://github.com/charlesweir/WordSupport/releases/download/V2.0/ReleaseV2.0.zip)
 
