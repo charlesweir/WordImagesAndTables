@@ -2,7 +2,7 @@
 
 This plug-in makes Word into a desktop publisher, making it easy to put images and tables in frames and lay them out automatically. 
 
-On its own, Microsoft Word is pretty poor at positioning images and tables. You have to position images manually; captions don't work very well; and when you add text or change anything everything ends up in a mess. But it doesn't have to be like that. Other word processing packages are rather good at positioning images and tables: Latex users point with pride at its clever image positioning; FrameMaker flows everything around pictures. But Microsoft Word is programmable, so why not make Word do the same?
+On its own, Microsoft Word is pretty poor at positioning images and tables. You have to position images manually; captions don't work very well; and when you add text or change anything everything ends up in a mess. But it doesn't have to be like that. Other word processing packages are rather good at positioning images and tables: Latex users point with pride at its clever image positioning; FrameMaker flows everything around pictures; InDesign and QuarkExpress do wonderful things. Yet Microsoft Word is programmable, so why not make Word do the same?
 
 This add-in does just that. It makes it easy to insert pictures and tables within frames, and lays out all those frames in your document in a pleasing way so that each frame is as close as possible to the main reference to it, without being constrained to be on the same page.
 
@@ -10,9 +10,9 @@ The plug-in also solves some other frustrations with Word:
 
 *  If you have an graphic-creating tool that doesn't support Word embedding (like many nowadays), then you have to save the graphic as a PNG/JPEG (for Windows) or PDF (for Mac) then import it into Word as a picture, then crop and size it to suit your needs. And when you need to make changes to the graphic, Word's 'change picture' function looses all the size and cropping you've so carefully set up and you have to crop and size it again--every time! The **Replace Picture** function solves that problem by remembering the size and crop for the picture. It makes changing external graphics as easy as object embedding!
 
-* Word doesn't update its fields consistently, especially cross references. Only when you print does it update the fields, so only then do you see the errors from lost field references (and even then with some fields you need to do it twice!). The **Update All** function solves that problem by updating every field when you press the button. So then you can search for "Error!" and " 0" to look for missing references.
+* Word doesn't update its fields consistently, especially cross references. Only when you print does it update the fields, so only then do you see the errors from lost field references (and even then with some fields you need to do it twice!). The **Update All** function solves that problem by fully updating every field. So then you can search for "Error!" and " 0" to look for missing references.
 
-* If you use Mendeley or Xotero, then the standard formatting for the table of references may not be exactly what you want; references break across pages, for example. The **Update All** button assigns a standard Word style ("Bibliography") to the references, so you can set the formatting as you like.
+* If you use Mendeley (or Xotero), then the standard formatting for the table of references may not be exactly what you want; references break across pages, for example. The **Update All** button assigns a standard Word style ("Bibliography") to the references, so you can set the formatting as you like.
 
 The plug-in works on the latest (2020) Microsoft Office installations: that is Word for Windows version 16, and Word for Mac version 16, but not Word 365 online.
 
