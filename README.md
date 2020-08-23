@@ -37,17 +37,14 @@ All the functions support **Undo**, so experiment as much as you like!
 
 ## How to Install the Plug-in
 
-Download the latest release [here](https://github.com/charlesweir/WordSupport/releases/download/V2.0/ReleaseV2.0.zip)
-
-Unzip the package, and copy the file *ImageAndTableSupport.dotx* as follows:
+Download the latest release [here](https://github.com/charlesweir/WordSupport/releases/download/V2.0/ReleaseV2.0.zip). Unzip the package, and copy the file *ImageAndTableSupport.dotx* as follows:
 
 ### On Windows
 
-Copy *ImageAndTableSupport.dotx* to *\<Your Home Directory\>/AppData/Roaming/Microsoft/Word/STARTUP*
-
-You can find your home directory using Windows - R, CMD , and it is shown in the prompt. *AppData* is normally hidden, so [here are brief instructions](https://support.microsoft.com/en-gb/help/4028316/windows-view-hidden-files-and-folders-in-windows-10) how to show it in File Explorer. 
+Copy *ImageAndTableSupport.dotx* to *%AppData%\Microsoft\Word\Startup*  
+To go to that directory in Windows File Explorer, type the above string into the address bar and hit enter.  
 
 ### On Mac
 
- Copy *ImageAndTableSupport.dotx* to *~/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word* .
-*Library* is normally hidden. In Finder, Use Cmd + Shift + . to reveal it.
+Copy *ImageAndTableSupport.dotx* to *~/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word*  
+To get to that folder in Finder, use Cmd-Shift-G, paste the above string into the dialog and click OK.
