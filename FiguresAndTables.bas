@@ -220,7 +220,7 @@ Sub RepositionFloatingImage()
         If Selection.Sections(1).pageSetup.TextColumns.Count > 1 Then
             ' Column layout. In column if small enough, else page. Toggle top/bottom
             Dim MaxSingleColumnImageWidth As Single
-            MaxSingleColumnImageWidth = Selection.Sections(1).pageSetup.TextColumns.Width ' + Selection.Sections(1).pageSetup.TextColumns.Spacing
+            MaxSingleColumnImageWidth = (Selection.Sections(1).pageSetup.TextColumns.Width * 1.05) ' Little bit of leeway.
             .WrapFormat.Type = wdWrapTopBottom
             If .Width > MaxSingleColumnImageWidth Then
                 .RelativeHorizontalPosition = wdRelativeHorizontalPositionMargin
