@@ -61,8 +61,9 @@ Public Sub LayoutTheseFloatingImages(myFramesToLayout As Collection)
         ShowStatusBarMessage ("Positioning " & oAnchoredFrame.Name)
         clsColumnLayout.PositionFrame oAnchoredFrame
     Next oAnchoredFrame
-    
-    EmptyCutBuffer
+
+    ' EmptyCutBuffer ' Upsets Mac.
+
     ShowStatusBarMessage ("Repositioned " & myFramesToLayout.Count & " frames")
 End Sub
 
@@ -70,7 +71,7 @@ Private Sub EmptyCutBuffer()
     ' Empty cut buffer to stop extra "Do you want to save clipboard?" on exit
     Dim aDataObject As DataObject
     Set aDataObject = New DataObject
-    aDataObject.SetText Text:=" "   ' For Mac - don't ask!
+    aDataObject.SetText Text:=" "
     aDataObject.PutInClipboard
 End Sub
 
