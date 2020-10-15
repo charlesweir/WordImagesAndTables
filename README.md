@@ -37,14 +37,18 @@ All the functions support **Undo**, so experiment as much as you like!
 
 ## How to Install the Plug-in
 
-Download the latest release [here](https://github.com/charlesweir/WordSupport/releases/download/V2.0/ReleaseV2.0.zip). Unzip the package, and copy the file *ImageAndTableSupport.dotx* as follows:
+Download the latest version of ImagesAndTableSupport.dotm [here](https://github.com/charlesweir/WordImagesAndTables/blob/master/ImageAndTableSupport.dotm). Copy the file as follows:
 
 ### On Windows
 
-Copy *ImageAndTableSupport.dotx* to *%AppData%\Microsoft\Word\Startup*  
+Copy *ImageAndTableSupport.dotm* to *%AppData%\Microsoft\Word\Startup*  
 To go to that directory in Windows File Explorer, type the above string into the address bar and hit enter.  
 
 ### On Mac
 
-Copy *ImageAndTableSupport.dotx* to *~/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word*  
+Copy *ImageAndTableSupport.dotm* to *~/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word*  
 To get to that folder in Finder, use Cmd-Shift-G, paste the above string into the dialog and click OK.
+
+## Upgrading and Uninstalling.
+
+To upgrade, simply download the latest as above, and overwrite the previous version. To uninstall, delete the file ImageAndTableSupport.dotm in the directory given above.
