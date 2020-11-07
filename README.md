@@ -34,7 +34,7 @@ All the functions support **Undo**, so experiment as much as you like!
 
 ## How to Install the Plug-in
 
-Download the latest version of ImagesAndTableSupport.dotm by clicking the **Download** button in the page [here](https://github.com/charlesweir/WordImagesAndTables/blob/master/ImageAndTableSupport.dotm). Copy that file as follows:
+Download the latest version of ImagesAndTableSupport.dotm by clicking the **Download** button in the page [here](https://github.com/charlesweir/WordImagesAndTables/releases/download/V2.1/ImageAndTableSupport.dotm). Copy that file as follows:
 
 ### On Windows
 
