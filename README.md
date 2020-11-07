@@ -1,6 +1,6 @@
 # Microsoft Word Plug-in for Image and Table Layout
 
-This plug-in improves Microsoft Word, making it easier to lay out images and tables. 
+This plug-in improves Microsoft Word, making it easier to work with cross-references, images and tables. 
 
 On its own, Microsoft Word is poor at positioning images and tables. You have to position images manually; captions don't work very well; and when you add text or change anything, everything ends up in a mess. But it doesn't have to be like that. Other word processing packages are rather good at positioning images and tables: Latex users point with pride at its clever image positioning; FrameMaker flows everything around pictures; InDesign and QuarkExpress do wonders! Yet Microsoft Word is programmable, so why not make Word do the same?
 
@@ -8,7 +8,7 @@ This add-in does just that. It makes it easy to insert pictures and tables withi
 
 The plug-in also addresses two frustrations using Word layouts:
 
-*  **Preserving image size and cropping**: If you have an graphic-creating tool that doesn't support Word embedding (and there are lots nowadays), then you have to save the graphic as a PNG, JPEG, SVG, or (on a Mac) PDF, then import it into Word as a picture, then crop and size it to suit your needs. Fine. But when you make changes to the graphic, Word's 'change picture' function forgets the size and cropping you've so carefully set up, so you have to crop and size it again--every time! The **Replace Picture** function solves that problem by remembering the size and crop for the picture. It makes changing external graphics as easy as object embedding!
+*  **Preserving image size and cropping**: If you have an graphic-creating tool that doesn't support Word embedding (and there are lots nowadays), then you have to save the graphic as a PNG, JPEG, SVG, or (on a Mac) PDF, then import it into Word as a picture, then crop and size it to suit your needs. That's fine. But when you make changes to the graphic, Word's 'Change Picture' function forgets the size and cropping you've so carefully set up, so you have to crop and size it again: every time! The **Replace Picture** function solves that problem by remembering the size and crop for the picture. It makes changing external graphics as easy as object embedding!
 
 * **Updating**: Word doesn't update its fields consistently, especially cross references. Only when you print does it update the fields, so only then do you see the errors from lost field references (and even then with some fields you may need to print twice!). The **Update All** function solves that problem by fully updating every field.
 
@@ -34,7 +34,7 @@ All the functions support **Undo**, so experiment as much as you like!
 
 ## How to Install the Plug-in
 
-Download the latest version of ImagesAndTableSupport.dotm by clicking the **Download** button in the page [here](https://github.com/charlesweir/WordImagesAndTables/releases/download/V2.1/ImageAndTableSupport.dotm). Copy that file as follows:
+Download the latest version of ImagesAndTableSupport.dotm by clicking [**Download** here](https://github.com/charlesweir/WordImagesAndTables/releases/download/V2.1/ImageAndTableSupport.dotm). Copy that file as follows:
 
 ### On Windows
 
