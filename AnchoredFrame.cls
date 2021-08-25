@@ -8,7 +8,8 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 ' AnchoredFrame:
-' A Floating Frame containing an caption (Figure or Table), plus the main reference in the document to that caption.
+' A Floating Frame containing a caption (Figure or Table), plus the main reference in the document to that caption.
+
 Option Explicit
 Option Compare Text ' Like operator is case insensitive
 
@@ -60,8 +61,8 @@ Private Property Get CurrentSection() As Section
     Set CurrentSection = ActiveDocument.Sections(SectionNumber)
 End Property
 
-Private Property Get CurrentPageSetup() As pageSetup
-    Set CurrentPageSetup = CurrentSection.pageSetup
+Private Property Get CurrentPageSetup() As PageSetup
+    Set CurrentPageSetup = CurrentSection.PageSetup
 End Property
 
 Public Property Get PlaceNearReference() As Range
@@ -172,7 +173,7 @@ End Sub
 Private Function ThisTemplate() As Template
     ' Answers the template file containing the autotext entries. Have to use name, since asking about code names leads to permission errors.
     For Each ThisTemplate In Application.Templates
-        If ThisTemplate.Name Like "WordSupport.dotm" Then Exit Function
+        If ThisTemplate.Name Like "ImageAndTableSupport.dotm" Then Exit Function
     Next ThisTemplate
     Debug.Assert False ' Not found the template
 End Function
@@ -267,12 +268,14 @@ End Sub
 ' Static
 Public Function IsValidFrame(shp As Shape) As Boolean
     ' Is this a text frame containing a caption that we need to layout?
+    
     IsValidFrame = False
     If shp.Type <> msoTextBox Then Exit Function
     
-    ' Don't layout frames aligned left or right.
-    If shp.Left = wdShapeLeft Or shp.Left = wdShapeRight Then Exit Function
+    ' Don't layout frames aligned left or right in a single-column section.
+    If (shp.Left = wdShapeLeft Or shp.Left = wdShapeRight) And (shp.Anchor.Sections(1).PageSetup.TextColumns.Count = 1) Then Exit Function
     
+    ' Only layout frames with the invisible bookmarks to captions created by Insert - Cross reference - [to Table, or to Figure], or by InsertFrame().
     Dim bookmarkSet As Bookmarks
     Set bookmarkSet = shp.TextFrame.TextRange.Bookmarks
     bookmarkSet.ShowHidden = True
@@ -297,8 +300,8 @@ Public Function ColumnNumberFor(rng As Range) As Integer
     ColumnNumberFor = 1 ' default
     ' In the left hand column, the distance from the page edge is the distance from the page boundry plus the left margin.
     ' So if we're further away, we're in the right hand column
-    Dim ps As pageSetup
-    Set ps = ActiveDocument.Sections(rng.Information(wdActiveEndSectionNumber)).pageSetup
+    Dim ps As PageSetup
+    Set ps = ActiveDocument.Sections(rng.Information(wdActiveEndSectionNumber)).PageSetup
     
     If ps.TextColumns.Count > 1 And _
             rng.Information(wdHorizontalPositionRelativeToPage) > rng.Information(wdHorizontalPositionRelativeToTextBoundary) + _

@@ -28,9 +28,16 @@ The plug-in creates six new buttons in the *Layout* tab:
 
 **Update All**: Updates all the fields in the document, reliably. To check for cross referencing errors, search for "Error!" and " 0" afterwards.
 
-**Relayout Document** is the most complex of the functions here. It looks through the current document for all the frames with references to them (as created by **New Figure** and **New Table**), checks that you want to go ahead, then arranges the frames at the top and bottom of columns and pages, each as close as possible to its reference, according to the Latex formatting rules. To make this possible, it moves Word's *Anchor Points* for each frame (unlike **Reposition**). **Relayout Document** ignores images and tables that are not in frames, frames without references to them, frames that are positioned *Left* or *Right*, and references that are in different sections from their corresponding frames. It takes a while, but the results can be excellent.
+**Relayout Document** is the most complex of the functions here. It looks through the current document for all the frames with references to them (as created by **New Figure** and **New Table**), checks that you want to go ahead, then arranges the frames at the top and bottom of columns and pages, each as close as possible to its reference, according to the Latex formatting rules. To make this possible, it moves Word's *Anchor Points* for each frame (unlike **Reposition**). **Relayout Document** ignores images and tables that are not in frames, frames without references to them, frames that are positioned *Left* or *Right* (in a single column page), and references that are in different sections from their corresponding frames. It takes a while, but the results can be excellent.
+
+## Using the Functions
+
 
 All the functions support **Undo**, so experiment as much as you like!
+
+We recommend doing **Update All** after **Relayout Document**, as the figure, table and page numbering may change.
+
+In **Relayout Document**, quite often when the layout appears wrong it is because a frame is being ignored by the algorithm. If a frame seems misplaced, check that it and its neighbouring frames do have up-to-date references to them *in the same section*, and are not positioned Left or Right (in a single column page).
 
 ## How to Install the Plug-in
 
@@ -53,4 +60,4 @@ To upgrade, simply download the latest as above, and overwrite the previous vers
 ## Developer instructions
 
 The test suite is in *WordSupportTest.docm*. The introduction part of the document also contains basic instructions how to edit, test and and debug the package.
-
+

@@ -7,9 +7,10 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
-    ' ColumnLayout: Represents the layout for the current column.
+' ColumnLayout: Represents the layout for the current column.
+
 Option Explicit
-Option Base 1 ' Arrays start at one in this module.
+Option Base 1 ' Arrays start at one in this module, since we number columns as 1 or 2
 
 Dim workingPage As Integer
 Dim workingPosition As Range
@@ -41,10 +42,17 @@ Sub CheckForNewPage()
         spaceUsedInColumn(2) = 0
     End If
 End Sub
+Function ShowRange(rng As Range) As String
+    ' For Debugging: Answers the text following the given range
+    ' Use in Immediate Window (control-G). E.g.
+    '   Debug.Print ShowRange(workingPosition) <return>
+    Dim newRange As Range
+    Set newRange = ActiveDocument.Range(Start:=rng.Start, End:=rng.End + 50)
+    ShowRange = newRange.Text
+End Function
         
 Sub PositionFrame(newFrame As AnchoredFrame)
 ' Position a single anchored frame as near as possible to its reference field
-
     With newFrame
         If workingPosition.Start < .ReferenceFieldStart.Start Then
             Set workingPosition = .PlaceNearReference
@@ -61,8 +69,7 @@ Sub PositionFrame(newFrame As AnchoredFrame)
             ' Todo: Add special case. Top of page is continued table, in which case we want to be bottom.
             .SetToFloatAt IIf(desiredPosition(newFrame) = ppTop, wdShapeTop, wdShapeBottom)
     
-            ' Unless
-            '   the anchor is now on a different page number, or Word has misbehaved and put both overlapping anyway.
+            ' Unless the anchor is now on a different page number, or Word has misbehaved and put both overlapping anyway.
             ' we're done.
             If .FramePageNumber = workingPage And CanFitInColumn(newFrame, CurrentColumn) Then
                 ' We're done

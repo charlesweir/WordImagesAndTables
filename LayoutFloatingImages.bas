@@ -52,7 +52,7 @@ Public Sub LayoutTheseFloatingImages(myFramesToLayout As Collection)
     Application.ScreenRefresh
     
     ' OK So all the frames are out of the way. Here's the interesting stuff.
-    ' Take each one and position it as close as possible to its reference according to the Latex (Knuth?) algorithm.
+    ' Take each one and position it as close as possible to its reference according to the LaTeX (Knuth?) algorithm.
     
     Dim clsColumnLayout As New ColumnLayout
     clsColumnLayout.Initialise
