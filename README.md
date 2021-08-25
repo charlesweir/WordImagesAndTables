@@ -49,3 +49,8 @@ To get to that folder in Finder, use Cmd-Shift-G, paste the above string into th
 ## Upgrading and Uninstalling.
 
 To upgrade, simply download the latest as above, and overwrite the previous version. To uninstall, delete the file ImageAndTableSupport.dotm in the directory given above.
+
+## Developer instructions
+
+The test suite is in WordSupportTest.docm. The introduction part of the document also contains basic instructions how to edit, test and and debug the package.
+
