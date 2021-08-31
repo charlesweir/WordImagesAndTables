@@ -50,8 +50,8 @@ To go to that directory in Windows File Explorer, type the above string into the
 
 ### On Mac
 
-Copy *ImageAndTableSupport.dotm* to *~/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word*  
-To get to that folder in Finder, use Cmd-Shift-G, paste the above string into the dialog and click OK.
+Copy *ImageAndTableSupport.dotm* to *~/Library/Group Containers/UBF8T346G9.Office/User Content/Startup/Word*  
+To get to that folder in Finder, use Cmd-Shift-G, paste the above string into the dialog and click OK. If it's not there, try *~/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word*
 
 ## Upgrading and Uninstalling.
 
