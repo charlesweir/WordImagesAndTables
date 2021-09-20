@@ -41,7 +41,7 @@ In **Relayout Document**, quite often when the layout appears wrong it is becaus
 
 ## How to Install the Plug-in
 
-Download the latest version of ImagesAndTableSupport.dotm by clicking [**Download** here](https://github.com/charlesweir/WordImagesAndTables/releases/download/V2.1/ImageAndTableSupport.dotm). Copy that file as follows:
+Download the latest version of ImagesAndTableSupport.dotm by clicking [**Download** here](https://github.com/charlesweir/WordImagesAndTables/releases/latest/ImageAndTableSupport.dotm). Copy that file as follows:
 
 ### On Windows
 
