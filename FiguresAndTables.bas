@@ -200,9 +200,11 @@ Private Static Sub PreserveImageCroppingAndSizing(IsPaste)
             .Width = Width
             
             .Line.Visible = lineVisible
-            .Line.Style = lineStyle
-            .Line.Weight = lineWeight
-            .Line.ForeColor = lineColor
+            If lineVisible <> False Then
+                .Line.Style = lineStyle
+                .Line.Weight = lineWeight
+                .Line.ForeColor = lineColor
+            End If
         End If
     End With
 End Sub
