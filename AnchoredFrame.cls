@@ -42,7 +42,7 @@ End Property
 
 Public Property Get ReferenceColumnNumber() As Integer
     ' Answers the column number containing the referencing field.
-    ReferenceColumnNumber = ColumnNumberFor(myReferencingField)
+    ReferenceColumnNumber = ColumnNumberFor(myReferencingField.Result)
 End Property
 
 Public Property Get SectionNumber() As Integer
@@ -103,7 +103,7 @@ Private Property Get FirstCaption() As Range
     ' Answers full paragraph that is the first caption in the frame.
     Dim para As Paragraph
     For Each para In myFrame.TextFrame.TextRange.Paragraphs
-        If para.style = "Caption" Then GoTo FoundPara ' Could be Like, if several caption types
+        If para.Style = "Caption" Then GoTo FoundPara ' Could be Like, if several caption types
     Next para: Debug.Assert False ' No caption found
 FoundPara:
     Set FirstCaption = para.Range
@@ -152,16 +152,22 @@ Public Sub Stash()
         MoveAnchorTo ActiveDocument.Content
     End If
 End Sub
-
+' ******************************************************************************************************************************************************************************
 Public Sub SetToFloatAt(topOrBottom As Long)
-    ' Sets the frame to float at the center of the top or bottom of the page
+    ' Sets the frame to float at the center of the top or bottom of the page or column
     With myFrame
-        ' Optimisation. Word re-lays out the document each time you set any of these, whether or not the value has changed. (actually doesn't make much difference)
+        ' Optimisation. Word re-lays out the document each time you set any of these, whether or not the value has changed, so don't set unnecessarily. (actually doesn't make much difference)
         If .RelativeVerticalPosition <> wdRelativeVerticalPositionMargin Then .RelativeVerticalPosition = wdRelativeVerticalPositionMargin
         .RelativeHorizontalPosition = IIf(FitsInColumn And (NumColumns > 1), wdRelativeHorizontalPositionColumn, wdRelativeHorizontalPositionMargin)
         If .Left <> wdShapeCenter Then .Left = wdShapeCenter
         If .WrapFormat.Type <> wdWrapTopBottom Then .WrapFormat.Type = wdWrapTopBottom
         If .Top <> topOrBottom Then .Top = topOrBottom
+        
+        ' Special. There's an odd word bug (Windows and Mac) where sometimes a frame centred at the top of the right column actually moves an inch to the left,
+        ' messing up the left hand column.
+        If (topOrBottom = wdShapeTop) And (NumColumns > 1) And (ReferenceColumnNumber = 2) Then
+            .Left = wdShapeRight ' strictly we ought to either check for the bug first, or calculate an exact position, but both are hard to do.
+        End If
     End With
 End Sub
 
@@ -261,7 +267,7 @@ ItemFound:
     theCaption.Delete wdCharacter, Len(vbCrLf)   ' Ending CRLF
     captionLocation.Paste
     ' In the case of the table, we somehow lose the caption style (not sure why). Just put it back.
-    captionLocation.style = "Caption"
+    captionLocation.Style = "Caption"
     captionLocation.Collapse wdCollapseEnd
     captionLocation.Delete wdCharacter ' the following empty paragraph.
 End Sub
