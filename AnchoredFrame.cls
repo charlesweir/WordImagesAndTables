@@ -167,6 +167,7 @@ Public Sub SetToFloatAt(topOrBottom As Long)
         ' messing up the left hand column.
         If (topOrBottom = wdShapeTop) And (NumColumns > 1) And (ReferenceColumnNumber = 2) Then
             .Left = wdShapeRight ' strictly we ought to either check for the bug first, or calculate an exact position, but both are hard to do.
+            ' Bizarrely the above appears to fix the problem, but the frame still ends up centered in the column and 'Layout Options' shows it as centred. I have no idea what's going on. Word!!!!
         End If
     End With
 End Sub
@@ -277,6 +278,8 @@ Public Function IsValidFrame(shp As Shape) As Boolean
     
     IsValidFrame = False
     If shp.Type <> msoTextBox Then Exit Function
+    
+    Debug.Print "analysing " & shp.TextFrame.TextRange.Text
     
     ' Don't layout frames aligned left or right in a single-column section.
     If (shp.Left = wdShapeLeft Or shp.Left = wdShapeRight) And (shp.Anchor.Sections(1).PageSetup.TextColumns.Count = 1) Then Exit Function

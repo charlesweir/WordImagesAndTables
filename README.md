@@ -61,3 +61,11 @@ To upgrade, simply download the latest as above, and overwrite the previous vers
 
 The test suite is in *WordSupportTest.docm*. The introduction part of the document also contains basic instructions how to edit, test and and debug the package.
 
+## Troubleshooting
+
+Sometimes **Relayout Document** may fail to identify some of the images and table frames to layout, and the result is usually messy. A good way to spot the problem is to check the count in the "Found <count> Figures and Tables to layout" dialog and see if that corresponds to the number of figures + tables you want laid out. Omitted frames can be because of a Word documentation corruption somewhere. Check:
+* That the images or tables are in a frame and have a caption. **Relayout Document** doesn't lay out floating images -- even ones with captions -- unless they're in a frame.
+* That each frame you want laid out does have a caption and a corresponding reference to it somewhere in the main text. Sometimes the invisible bookmark in the caption can get lost; do **Update All**, and fix any references that show **Error! Reference source not found.**
+* That (in a single-column section of the document) the frame isn't set to align *left* or *right*. This is a deliberate feature to permit small figures with text wrapped around them.
+
+
