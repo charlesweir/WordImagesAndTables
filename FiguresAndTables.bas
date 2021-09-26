@@ -200,7 +200,7 @@ Private Static Sub PreserveImageCroppingAndSizing(IsPaste)
             .Width = Width
             
             .Line.Visible = lineVisible
-            If lineVisible <> False Then
+            If lineVisible Then
                 .Line.Style = lineStyle
                 .Line.Weight = lineWeight
                 .Line.ForeColor = lineColor
@@ -224,62 +224,47 @@ Sub RepositionFloatingImage()
 '      If large, float top or bottom of the page
 '      If small, float Left or right, near the anchor
 '
-
-    Dim AnchorParagraph As Paragraph
-
+    Dim SingleColumnWidth, NumColumns, InsideMarginWidth, MaxSingleColumnFrameWidth As Single
+    With Selection.Sections(1).PageSetup
+        SingleColumnWidth = .TextColumns.Width
+        NumColumns = .TextColumns.Count
+        InsideMarginWidth = .PageWidth - .LeftMargin - .RightMargin - .Gutter
+        MaxSingleColumnFrameWidth = SingleColumnWidth * 1.05 ' Frames less wide than this are treated as intended to be in a column
+    End With
+    
     With SelectedFloatingShape
-        If Selection.Sections(1).PageSetup.TextColumns.Count > 1 Then
-            ' Column layout. In column if small enough, else page. Toggle top/bottom
-            Dim MaxSingleColumnImageWidth As Single
-            MaxSingleColumnImageWidth = (Selection.Sections(1).PageSetup.TextColumns.Width * 1.05) ' Little bit of leeway.
+        ' Special: Small frames in a single column page layout toggle left or right near the anchor.
+        If NumColumns = 1 And .Width < SingleColumnWidth / 2 Then
+            .WrapFormat.Type = wdWrapSquare
+            .RelativeVerticalPosition = wdRelativeVerticalPositionLine
+            .Top = wdShapeTop  'Or wdShapeCenter, but that looked a bit odd.
+            .RelativeHorizontalPosition = wdRelativeHorizontalPositionMargin
+            .Left = IIf(.Left = wdShapeRight, wdShapeLeft, wdShapeRight)
+        Else
+            ' Toggle top/bottom of page or column
             .WrapFormat.Type = wdWrapTopBottom
-            If .Width > MaxSingleColumnImageWidth Then
-                .RelativeHorizontalPosition = wdRelativeHorizontalPositionMargin
-            Else
-                .RelativeHorizontalPosition = wdRelativeHorizontalPositionColumn
-            End If
+            .RelativeHorizontalPosition = IIf(.Width > MaxSingleColumnFrameWidth, wdRelativeHorizontalPositionMargin, wdRelativeHorizontalPositionColumn)
             .RelativeVerticalPosition = wdRelativeVerticalPositionMargin
             .Left = wdShapeCenter
-            If .Top = wdShapeTop Then
-                .Top = wdShapeBottom
-            Else
-                .Top = wdShapeTop
-            End If
-        Else
-            ' One column.
-            Dim HalfPageWidth As Single
-            HalfPageWidth = Selection.Sections(1).PageSetup.TextColumns.Width / 2
-            If .Width < HalfPageWidth Then
-                'Small picture. Put near anchor, wrap around. Toggle left/right
-                .WrapFormat.Type = wdWrapSquare
-                .RelativeVerticalPosition = wdRelativeVerticalPositionLine
-                .Top = wdShapeTop  'Or wdShapeCenter, but that looked a bit odd.
-                
-                .RelativeHorizontalPosition = wdRelativeHorizontalPositionColumn
-                If .Left = wdShapeRight Then
-                    .Left = wdShapeLeft
-                Else
-                    .Left = wdShapeRight
-                End If
-            Else
-                ' Big picture: Toggle top/bottom of page
-                .WrapFormat.Type = wdWrapTopBottom
-                .RelativeVerticalPosition = wdRelativeVerticalPositionMargin
-                .RelativeHorizontalPosition = wdRelativeHorizontalPositionColumn
-                .Left = wdShapeCenter
-                If .Top = wdShapeTop Then
-                    .Top = wdShapeBottom
-                Else
-                    .Top = wdShapeTop
-                End If
-            End If
+            .Top = IIf(.Top = wdShapeTop, wdShapeBottom, wdShapeTop)
+            ' Now make the frame has the correct width:
+            .Width = IIf(NumColumns = 2 And .Width > MaxSingleColumnFrameWidth, InsideMarginWidth, SingleColumnWidth)
         End If
-            
+        
+        ' And set height to fit the contents:
+        .TextFrame.AutoSize = -1
+        .TextFrame.WordWrap = -1
+        
+        ' And lock the anchor. It makes dragging not work, but we don't want that to happen by accident.
+        .LockAnchor = -1
+        
+        ' Make it visible
+        ActiveWindow.ScrollIntoView .TextFrame.TextRange
     End With
-
+    
 End Sub
 
-Private Function SelectedFloatingShape() As Shape
+Public Function SelectedFloatingShape() As Shape
     ' Answers the floating shape intended by the user
     ' either a selected floating shape or frame, or a text frame containing the cursor
     If Selection.ShapeRange.Count > 0 Then

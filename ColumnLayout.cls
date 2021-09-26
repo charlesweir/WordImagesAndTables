@@ -116,6 +116,7 @@ Sub PositionFrame(newFrame As AnchoredFrame)
         
         ' And move it there
         .MoveAnchorTo workingPosition
+        
         .SetToFloatAt IIf(desiredPosition(newFrame) = ppTop, wdShapeTop, wdShapeBottom)
         UpdateColumnSpace newFrame
     End With

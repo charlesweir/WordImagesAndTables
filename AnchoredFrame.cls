@@ -198,6 +198,8 @@ Public Sub InitWithNewFrameAt(oRng As Range, autotextName As String)
         .Width = CurrentPageSetup.TextColumns.Width
         .TextFrame.AutoSize = -1
         .TextFrame.WordWrap = -1
+        ' And lock the anchor. It makes dragging not work, but we don't want that to happen by accident.
+        .LockAnchor = -1
     End With
     InsertCrossReferenceBesideAnchor autotextName
 End Sub
