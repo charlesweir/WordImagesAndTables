@@ -193,6 +193,12 @@ Public Sub InitWithNewFrameAt(oRng As Range, autotextName As String)
     'Debug.Print "Done"
     Debug.Assert rngInsertedAnchor.ShapeRange.Count = 1 ' Autotext contains floating frame
     Set Frame = rngInsertedAnchor.ShapeRange(1)
+    ' Set the frame up to be the column width, and automatically resize vertically.
+    With myFrame
+        .Width = CurrentPageSetup.TextColumns.Width
+        .TextFrame.AutoSize = -1
+        .TextFrame.WordWrap = -1
+    End With
     InsertCrossReferenceBesideAnchor autotextName
 End Sub
 
