@@ -2,23 +2,26 @@
 
 <!-- Wix Installer script for ImageAndTableSupport.
  See https://wixtoolset.org/documentation/ and tool/compilation instructions -->
- 
+
+<?define ProductName='Image and Table Support for Microsoft Word' ?>
+<?define ProductVersion='2.4' ?>
+
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
 
     <!-- Product description. Increment the version number in each new release.
     (For ImageAndTableSupport, it should be the same as the Github release tag).  -->
     
-    <Product Name='Image and Table Support for Microsoft Word' Id='*' UpgradeCode='A710D079-7112-4FDC-8D7A-DEE661E1366D'
-        Language='1033' Codepage='1252' Version='2.4' Manufacturer='Charles Weir'>
+    <Product Name='$(var.ProductName)' Id='*' UpgradeCode='A710D079-7112-4FDC-8D7A-DEE661E1366D'
+        Language='1033' Codepage='1252' Version='$(var.ProductVersion)' Manufacturer='Charles Weir'>
         
-        <Package Id='*' Keywords='Installer' Description="MS Word Image and Table Support Installer"
+        <Package Id='*' Keywords='Installer' Description="Installer for $(var.ProductName), v$(var.ProductVersion)"
         Comments='Windows Installer Package' Manufacturer='Charles Weir'
         InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
         
         <!-- Magic so upgrades work.
         See https://stackoverflow.com/questions/37941133/ice61-this-product-should-remove-only-older-versions-of-itself -->
         
-        <MajorUpgrade AllowSameVersionUpgrades="no" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+        <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
         
         <!-- Runes to say store the media in the MSI file -->
         
