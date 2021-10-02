@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+    <Product Name='Image and Table Support for MS Word' Id='5EEE5143-1820-4CC7-ADE3-2A4FC43AEBFB' UpgradeCode='A710D079-7112-4FDC-8D7A-DEE661E1366D'
+        Language='1033' Codepage='1252' Version='1.0' Manufacturer='Charles Weir'>
+        
+        <Package Id='*' Keywords='Installer' Description="Image and Table Support Installer"
+        Comments='Windows Installer Package' Manufacturer='Charles Weir'
+        InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+        
+        <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
+        
+        <!-- \Users\<user name>\AppData\Roaming\Microsoft\Word\STARTUP
+        [AppDataFolder]\Microsoft\Templates\STARTUP
+        N.b. This might not be the users template folder, but deal with that in the documentation.
+        *** Folders end in \ !!!
+        -->
+        
+        <SetDirectory Id="STARTUP_TEMPLATES" Value="[AppDataFolder]\Microsoft\Word\STARTUP" />
+        
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="STARTUP_TEMPLATES">
+                <Component Id="ApplicationFiles" Guid="0E4812A6-AEC3-4B36-8654-E4FAA627C8F3" KeyPath="yes" >
+                    <File Id="TheTemplate" Source="ImageAndTableSupport.dotm" Vital="yes" />
+                    <RemoveFile Id="removeTemplate" On="uninstall" Name="ImageAndTableSupport.dotm"/>
+                </Component>
+            </Directory>
+        </Directory>
+    
+        <Feature Id="DefaultFeature" Level="1">
+            <ComponentRef Id="ApplicationFiles"/>
+        </Feature>
+    </Product>
+</Wix>
