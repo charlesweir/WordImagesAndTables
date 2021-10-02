@@ -4,5 +4,6 @@
 pushd "%~dp0\"
 candle ImageAndTableSupport.wxs
 light -sice:ICE61 ImageAndTableSupport.wixobj
+del *.wix*
 popd
 @pause
