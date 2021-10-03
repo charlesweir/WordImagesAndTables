@@ -1,5 +1,10 @@
 # Microsoft Word Plug-in for Image and Table Layout
 
+<head>
+    <meta name="image" property="og:image" content="https://github.com/charlesweir/WordImagesAndTables/blob/master/BlueRectangleCrop.png"/>
+    <meta name="twitter:image" content="https://github.com/charlesweir/WordImagesAndTables/blob/master/BlueRectangleCrop.png"/>
+</head>
+<br>
 New, wonderful, support for floating images and tables in Microsoft Word!
 
 Click [here](#installation) to skip to the installation instructions and [here](#instructions) for the usage instructions.
@@ -86,6 +91,6 @@ The **New Figure**, **New Table** and **Reposition** functions automate the manu
 * That the image or table concerned is in a frame and has a caption within the frame. **Relayout Document** doesn't lay out floating images -- even ones with captions -- unless they're in a frame.
 * That the frame you want laid out has a corresponding reference to its caption *in the same section* in the main text (this feature allows you to have forward references to images or tables in earlier sections)
 * That the invisible bookmark in the caption has not got lost; do **Update All**, and fix any references that show **Error! Reference source not found.**
-* That (in a single-column section of the document) the frame isn't set to align *left* or *right*. This feature to permit small figures with text wrapped around them.
+* That (in a single-column section of the document) the frame isn't set to align *left* or *right*. This is a feature to permit small figures with text wrapped around them.
 
 **Crashes and aborts**: Occasionally, you may see **Relayout Document** fail with an 'Assertion' error. This means that Word is not behaving as it is supposed to. In particular, Word can take quite a while after you open a document before it has actually set up all the editing information related to that document; so, just wait a bit and try again. Also, Word for Mac is a bit flaky, and complicated operations like **Relayout Document** can occasionally just terminate Word for Mac without warning or explanation (though I've never seen that happen in Word for Windows). Restarting and trying again usually works.
