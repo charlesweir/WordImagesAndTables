@@ -2,6 +2,8 @@
 
 New, wonderful, support for floating images and tables in Microsoft Word!
 
+Click [here](#installation) to skip to installation instructions and [here](#instructions) for usage instructions.
+
  This plug-in improves Microsoft Word, making it much easier to work with floating images, floating tables and the references to them. On its own, Microsoft Word is poor at positioning images and tables. You have to position images manually; captions don't work very well; and when you add text or change anything, everything ends up in a mess. But it doesn't have to be like that. Other word processing packages are rather good at positioning images and tables: LaTeX users point with pride at its clever image positioning; FrameMaker flows everything around pictures; InDesign and QuarkExpress do wonders! Yet Microsoft Word is programmable, so why not make Word do the same?
 
 This add-in does just that. It makes it easy to insert pictures and tables within frames, and can lay out all those frames in your document in a pleasing way so that each frame is as close as possible to the main reference to it, without being constrained to be on the same page.
@@ -14,11 +16,11 @@ The plug-in also addresses two limitations of Word:
 
 The plug-in works on the latest (2021) Microsoft Office installations: Word for Windows version 16, and Word for Mac version 16. It does not support Word 365 online, since that doesn't support VBA (or floating images and tables, either).
 
-## The Functions (and When to Use Them)
+## <a name="instructions"/> The Functions (and When to Use Them)
 
 The plug-in creates six new buttons in the *Layout* tab:
 
-**New Figure**: creates a new figure in a frame with a figure caption, plus a reference to it at the insertion point. It uses a placeholder figure; use the **Replace Picture** button to chose another. It puts the frame at the top of the page; use the **Reposition** button to move the frame around, or **Relayout Document** to rearrange all the frames.
+**New Figure**: creates a new figure in a frame with a figure caption, plus a reference to it at the insertion point. It uses a placeholder figure; use the **Replace Picture** button to chose another, and edit the caption accordingly. You can resize the image and the frame will expand or contract to fit. The frame starts at the top of the page; use the **Reposition** button to move the frame around, or **Relayout Document** to rearrange all the frames. In two-column mode, **New Figure** fits the figure to a single column; to make a double-width figure, select the frame and drag a corner to make it bigger than a column, then click **Reposition** to expand it to the full width.
 
 **New Table**: creates a new table in a frame with a caption, plus a reference to it at the insertion point. Replace the table with what you want. The frame starts at the bottom of the page; again, use  **Reposition** or **Relayout Document** to move it around.
 
@@ -36,7 +38,7 @@ All the functions support **Undo**, so experiment as much as you like!
 
 We recommend doing **Update All** after **Relayout Document**, as the figure, table and page numbering may change.
 
-## How to Install the Plug-in
+## <a name="installation"/>How to Install the Plug-in
 
 ### On Windows
 
@@ -57,6 +59,15 @@ Restart Microsoft Word, and go to the **Layout** tab. There should be a new tab 
 ## Upgrading and Uninstalling.
 
 To upgrade, simply install the latest version as above, overwriting the previous version. To uninstall, use Windows' uninstall of 'Image and Table Support for Microsoft Word. On the Mac or the non-standard Windows installations, delete the file *ImageAndTableSupport.dotm* in the directory given above.
+
+## Changing the Layout of the Picture and Table Frames
+
+The New Figure and New Table frames use several Word styles; feel free to modify them in your document as required:
+
+- **Caption** is the Word style for captions – probably best centred.
+- **Figure** is a paragraph style for the figures – probably best centred.
+- **Table Cell** is for all the cells in a table. It should have no spacing around the paragraph. 
+- **Table End** is for the blank para following the table, and should be tiny (font size 2pt). 
 
 ## Developer instructions
 
