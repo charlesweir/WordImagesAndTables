@@ -19,6 +19,7 @@
         InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
         
         <!-- Magic so upgrades work.
+        Needs -sice:ICE61 on the Light command line to stop warnings.
         See https://stackoverflow.com/questions/37941133/ice61-this-product-should-remove-only-older-versions-of-itself -->
         
         <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -41,7 +42,7 @@
         
         <Directory Id="TARGETDIR" Name="SourceDir"> <!-- Runes for Wix -->
             <Directory Id="STARTUP_TEMPLATES"> <!-- Install to folder [STARTUP_TEMPLATES] -->
-                <Component Id="ApplicationFiles" Guid="0E4812A6-AEC3-4B36-8654-E4FAA627C8F3" KeyPath="yes" > <!-- KeyPath means track in the registry -->
+                <Component Id="ApplicationFiles" Guid="0E4812A6-AEC3-4B36-8654-E4FAA627C8F3" KeyPath="yes" > <!-- KeyPath means reference count in the registry -->
                     <File Id="TheTemplate" Source="ImageAndTableSupport.dotm" Vital="yes" />
                 </Component>
             </Directory>

@@ -1,18 +1,18 @@
 # Microsoft Word Plug-in for Image and Table Layout
 
-This plug-in improves Microsoft Word, making it easier to work with cross-references, images and tables. 
+New, wonderful, support for floating images and tables in Microsoft Word!
 
-On its own, Microsoft Word is poor at positioning images and tables. You have to position images manually; captions don't work very well; and when you add text or change anything, everything ends up in a mess. But it doesn't have to be like that. Other word processing packages are rather good at positioning images and tables: LaTeX users point with pride at its clever image positioning; FrameMaker flows everything around pictures; InDesign and QuarkExpress do wonders! Yet Microsoft Word is programmable, so why not make Word do the same?
+ This plug-in improves Microsoft Word, making it much easier to work with floating images, floating tables and the references to them. On its own, Microsoft Word is poor at positioning images and tables. You have to position images manually; captions don't work very well; and when you add text or change anything, everything ends up in a mess. But it doesn't have to be like that. Other word processing packages are rather good at positioning images and tables: LaTeX users point with pride at its clever image positioning; FrameMaker flows everything around pictures; InDesign and QuarkExpress do wonders! Yet Microsoft Word is programmable, so why not make Word do the same?
 
 This add-in does just that. It makes it easy to insert pictures and tables within frames, and can lay out all those frames in your document in a pleasing way so that each frame is as close as possible to the main reference to it, without being constrained to be on the same page.
 
-The plug-in also addresses two frustrations using Word layouts:
+The plug-in also addresses two limitations of Word:
 
-*  **Preserving image size and cropping**: If you have an graphic-creating tool that doesn't support Word embedding (and there are lots nowadays), then you have to save the graphic as a PNG, JPEG, SVG, or (on a Mac) PDF, import it into Word as a picture, then crop and size it to suit your needs. That's fine. But when you make changes to the graphic, Word's 'Change Picture' function forgets the size and cropping you've so carefully set up, so you have to crop and size it again: every time! The **Replace Picture** function solves that problem by remembering the size and crop for the picture (and its border settings too). It makes changing external graphics as easy as object embedding!
+*  **Preserving image size and cropping**: If you have an graphic-creating tool that doesn't support Word embedding (and there are lots nowadays), then you have to save the graphic as a PNG, JPEG, SVG, or (on a Mac) PDF, import it into Word as a picture, then crop and size it to suit your needs. That's easy enough. But when you make changes to the graphic, Word's 'Change Picture' function forgets the size and cropping you've so carefully set up, so you have to crop and size it again: every time! The **Replace Picture** function solves that problem by remembering the size and crop for the picture (and its border settings too). It makes changing external graphics as easy as object embedding!
 
 * **Updating**: Word doesn't update its fields consistently, especially cross references. Only when you print does it update the fields, so only then do you see the errors from lost field references (and even then with some fields you may need to print twice!). The **Update All** function solves that problem by fully updating every field.
 
-The plug-in works on the latest (2020) Microsoft Office installations: Word for Windows version 16, and Word for Mac version 16. It does not support Word 365 online, since that doesn't support VBA.
+The plug-in works on the latest (2021) Microsoft Office installations: Word for Windows version 16, and Word for Mac version 16. It does not support Word 365 online, since that doesn't support VBA (or floating images and tables, either).
 
 ## The Functions (and When to Use Them)
 
@@ -38,25 +38,29 @@ We recommend doing **Update All** after **Relayout Document**, as the figure, ta
 
 ## How to Install the Plug-in
 
-Download the latest version of ImagesAndTableSupport.dotm by clicking [**Download** here](https://github.com/charlesweir/WordImagesAndTables/releases/latest/download/ImageAndTableSupport.dotm). Copy that file as follows:
-
 ### On Windows
 
-Copy *ImageAndTableSupport.dotm* to *%AppData%\Microsoft\Word\Startup*  
-To go to that directory in Windows File Explorer, type the above string into the address bar and hit enter.  
+Download and run the installer [*ImagesAndTableSupport.msi* here](https://github.com/charlesweir/WordImagesAndTables/releases/latest/download/ImageAndTableSupport.msi)
+
+**Note** - this may not work if the user template location is not the default, or for certain langage versions of Word (such as Turkish). If not, download [*ImageAndTableSupport.dotm* here](https://github.com/charlesweir/WordImagesAndTables/releases/latest/download/ImageAndTableSupport.dotm), and copy it into the Word startup folder, which you can find using [these instructions](https://wordaddins.com/support/how-to-find-the-word-startup-folder/).
 
 ### On Mac
 
-Copy *ImageAndTableSupport.dotm* to *~/Library/Group Containers/UBF8T346G9.Office/User Content/Startup/Word*  
+Download the file [*ImageAndTableSupport.dotm* here](https://github.com/charlesweir/WordImagesAndTables/releases/latest/download/ImageAndTableSupport.dotm) and move it to *~/Library/Group Containers/UBF8T346G9.Office/User Content/Startup/Word*  
+
 To get to that folder in Finder, use Cmd-Shift-G, paste the above string into the dialog and click OK. If it's not there, try *~/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word*
+
+### Checking Installation
+
+Restart Microsoft Word, and go to the **Layout** tab. There should be a new tab group containing six items, starting **New Figure** and **New Table**.
 
 ## Upgrading and Uninstalling.
 
-To upgrade, simply download the latest as above, and overwrite the previous version. To uninstall, delete the file *ImageAndTableSupport.dotm* in the directory given above.
+To upgrade, simply install the latest version as above, overwriting the previous version. To uninstall, use Windows' uninstall of 'Image and Table Support for Microsoft Word. On the Mac or the non-standard Windows installations, delete the file *ImageAndTableSupport.dotm* in the directory given above.
 
 ## Developer instructions
 
-The test suite is in *WordSupportTest.docm*. The introduction part of the document also contains basic instructions how to edit, test and and debug the package.
+The test suite includes *WordSupportTest.docm*. The introduction part of the document also contains basic instructions how to edit, test and and debug the package. Further *...Test.docm* files test different features.
 
 ## Troubleshooting
 
@@ -66,4 +70,4 @@ The test suite is in *WordSupportTest.docm*. The introduction part of the docume
 * That the invisible bookmark in the caption has not got lost; do **Update All**, and fix any references that show **Error! Reference source not found.**
 * That (in a single-column section of the document) the frame isn't set to align *left* or *right*. This feature to permit small figures with text wrapped around them.
 
-**Crashes and aborts**: Occasionally, you may see **Relayout Document** fail with an 'Assertion' error. This means that Word is not behaving as it is supposed to. In particular, Word can take quite a while after you open a document before it has actually set up all the editing information related to that document; so, just wait a bit and try again. Also, Word for Mac is a bit flaky, and complicated operations like **Relayout Document** can occasionally just terminate Word for Mac without warning or explanation (I've never seen this in Word for Windows). Restarting and trying again usually works.
+**Crashes and aborts**: Occasionally, you may see **Relayout Document** fail with an 'Assertion' error. This means that Word is not behaving as it is supposed to. In particular, Word can take quite a while after you open a document before it has actually set up all the editing information related to that document; so, just wait a bit and try again. Also, Word for Mac is a bit flaky, and complicated operations like **Relayout Document** can occasionally just terminate Word for Mac without warning or explanation (but I've never seen that in Word for Windows). Restarting and trying again usually works.
