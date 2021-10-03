@@ -1,9 +1,5 @@
 # Microsoft Word Plug-in for Image and Table Layout
 
-<head>
-    <meta name="image" property="og:image" content="https://github.com/charlesweir/WordImagesAndTables/blob/master/BlueRectangleCrop.png"/>
-    <meta name="twitter:image" content="https://github.com/charlesweir/WordImagesAndTables/blob/master/BlueRectangleCrop.png"/>
-</head>
 <br>
 New, wonderful, support for floating images and tables in Microsoft Word!
 
