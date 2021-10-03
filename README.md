@@ -2,7 +2,7 @@
 
 New, wonderful, support for floating images and tables in Microsoft Word!
 
-Click [here](#installation) to skip to installation instructions and [here](#instructions) for usage instructions.
+Click [here](#installation) to skip to the installation instructions and [here](#instructions) for the usage instructions.
 
  This plug-in improves Microsoft Word, making it much easier to work with floating images, floating tables and the references to them. On its own, Microsoft Word is poor at positioning images and tables. You have to position images manually; captions don't work very well; and when you add text or change anything, everything ends up in a mess. But it doesn't have to be like that. Other word processing packages are rather good at positioning images and tables: LaTeX users point with pride at its clever image positioning; FrameMaker flows everything around pictures; InDesign and QuarkExpress do wonders! Yet Microsoft Word is programmable, so why not make Word do the same?
 
@@ -38,7 +38,7 @@ All the functions support **Undo**, so experiment as much as you like!
 
 We recommend doing **Update All** after **Relayout Document**, as the figure, table and page numbering may change.
 
-## <a name="installation"/>How to Install the Plug-in
+## <a name="installation"/> How to Install the Plug-in
 
 ### On Windows
 
@@ -54,24 +54,28 @@ To get to that folder in Finder, use Cmd-Shift-G, paste the above string into th
 
 ### Checking Installation
 
-Restart Microsoft Word, and go to the **Layout** tab. There should be a new tab group containing six items, starting **New Figure** and **New Table**.
+<img align="right" src="images/LayoutTab.png">Restart Microsoft Word, and go to the **Layout** tab. There should be a new tab group containing six items, starting **New Figure** and **New Table**, as shown here.
+
 
 ## Upgrading and Uninstalling.
 
-To upgrade, simply install the latest version as above, overwriting the previous version. To uninstall, use Windows' uninstall of 'Image and Table Support for Microsoft Word. On the Mac or the non-standard Windows installations, delete the file *ImageAndTableSupport.dotm* in the directory given above.
+To upgrade, simply install the latest version as above, overwriting the previous version. 
+
+To uninstall, use Windows' uninstall of 'Image and Table Support for Microsoft Word'. On the Mac or the non-standard Windows installations, delete the file *ImageAndTableSupport.dotm* in the directory given above.
 
 ## Changing the Layout of the Picture and Table Frames
 
-The New Figure and New Table frames use several Word styles; feel free to modify them in your document as required:
+The **New Figure** and **New Table** frames use several Word styles; feel free to modify them in your document as required:
 
-- **Caption** is the Word style for captions – probably best centred.
+- **Caption** is the standard Word style for captions – probably best centred.
 - **Figure** is a paragraph style for the figures – probably best centred.
-- **Table Cell** is for all the cells in a table. It should have no spacing around the paragraph. 
-- **Table End** is for the blank para following the table, and should be tiny (font size 2pt). 
+- **Table End** is for the blank spacing paragraph following a table, and should be tiny (typically font size 2pt). 
 
 ## Developer instructions
 
 The test suite includes *WordSupportTest.docm*. The introduction part of the document also contains basic instructions how to edit, test and and debug the package. Further *...Test.docm* files test different features.
+
+The **Update All** procedure has a hook to allow you to add your own processing. I use it, for example, to refresh my citations.  Just define the public subroutine **sub DoAdditionalDocumentUpdates()** in a module in your Normal template (or anywhere Word can find it), and put the VBA code there.
 
 ## Troubleshooting
 
@@ -81,4 +85,4 @@ The test suite includes *WordSupportTest.docm*. The introduction part of the doc
 * That the invisible bookmark in the caption has not got lost; do **Update All**, and fix any references that show **Error! Reference source not found.**
 * That (in a single-column section of the document) the frame isn't set to align *left* or *right*. This feature to permit small figures with text wrapped around them.
 
-**Crashes and aborts**: Occasionally, you may see **Relayout Document** fail with an 'Assertion' error. This means that Word is not behaving as it is supposed to. In particular, Word can take quite a while after you open a document before it has actually set up all the editing information related to that document; so, just wait a bit and try again. Also, Word for Mac is a bit flaky, and complicated operations like **Relayout Document** can occasionally just terminate Word for Mac without warning or explanation (but I've never seen that in Word for Windows). Restarting and trying again usually works.
+**Crashes and aborts**: Occasionally, you may see **Relayout Document** fail with an 'Assertion' error. This means that Word is not behaving as it is supposed to. In particular, Word can take quite a while after you open a document before it has actually set up all the editing information related to that document; so, just wait a bit and try again. Also, Word for Mac is a bit flaky, and complicated operations like **Relayout Document** can occasionally just terminate Word for Mac without warning or explanation (though I've never seen that happen in Word for Windows). Restarting and trying again usually works.
