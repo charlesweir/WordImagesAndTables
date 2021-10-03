@@ -62,23 +62,30 @@ Sub PositionFrame(newFrame As AnchoredFrame)
         
         CheckForNewPage
         
-        If desiredPosition(newFrame) <> ppElsewhere Then
+        Dim desiredPos As PossiblePosition
+        desiredPos = desiredPosition(newFrame)
+        
+        If desiredPos <> ppElsewhere Then
+            Dim startingCol As Integer
+            startingCol = CurrentColumn
+            
             ' Try moving it to the working position, at the top or bottom of the page:
-            .MoveAnchorTo workingPosition
+            .MoveAnchorTo workingPosition ' KV! This actually moves the frame, potentially changing desiredPosition and CurrentColumn.
     
             ' Todo: Add special case. Top of page is continued table, in which case we want to be bottom.
-            .SetToFloatAt IIf(desiredPosition(newFrame) = ppTop, wdShapeTop, wdShapeBottom)
+            .SetToFloatAt IIf(desiredPos = ppTop, wdShapeTop, wdShapeBottom)
     
-            ' Unless the anchor is now on a different page number, or Word has misbehaved and put both overlapping anyway.
+            ' Unless the anchor is now on a different page number or column number
+            ' or Word has misbehaved and put both overlapping anyway.
             ' we're done.
-            If .FramePageNumber = workingPage And CanFitInColumn(newFrame, CurrentColumn) Then
+            If .FramePageNumber = workingPage And CurrentColumn = startingCol And CanFitInColumn(newFrame, CurrentColumn) Then
                 ' We're done
                 UpdateColumnSpace newFrame
                 Exit Sub
             End If
         End If
         
-        ' OK. There wasn't space enough on that page, put it on the next one:
+        ' OK. There wasn't space enough on that page or column, put it on the next one:
         .Stash ' Get it out of the way.
         
         ' Find the first para (line?) on the next column
