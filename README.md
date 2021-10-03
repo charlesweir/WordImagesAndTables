@@ -30,7 +30,7 @@ The plug-in creates six new buttons in the *Layout* tab:
 
 **Update All**: Updates all the fields in the document, reliably. To check for cross referencing errors, search for "Error!" and " 0" afterwards.
 
-**Relayout Document** is the most complex of the functions here. It looks through the current document for all the frames with references to them (as created by **New Figure** and **New Table**), checks that you want to go ahead, then arranges the frames at the top and bottom of columns and pages, each as close as possible to its reference, according to the LaTeX formatting rules. To make this possible, it moves Word's *Anchor Points* for each frame (unlike **Reposition**). **Relayout Document** ignores images and tables that are not in frames, frames without references to them, frames that are positioned *Left* or *Right* (in a single column page), and references that are in different sections from their corresponding frames. It takes a second or two per frame laid out, but the results can be excellent.
+**Relayout Document** <a name="relayoutDocument"/> is the most complex of the functions here. It looks through the current document for all the frames with references to them (as created by **New Figure** and **New Table**), checks that you want to go ahead, then arranges the frames at the top and bottom of columns and pages, each as close as possible to its reference, according to the LaTeX formatting rules. To make this possible, it moves Word's *Anchor Points* for each frame (unlike **Reposition**). **Relayout Document** ignores images and tables that are not in frames, frames without references to them, frames that are positioned *Left* or *Right* (in a single column page), and references that are in different sections from their corresponding frames. It takes a second or two per frame laid out, but the results can be excellent.
 
 ## Using the Functions
 
@@ -56,7 +56,6 @@ To get to that folder in Finder, use Cmd-Shift-G, paste the above string into th
 
 <img align="right" src="images/LayoutTab.png">Restart Microsoft Word, and go to the **Layout** tab. There should be a new tab group containing six items, starting **New Figure** and **New Table**, as shown here.
 
-
 ## Upgrading and Uninstalling.
 
 To upgrade, simply install the latest version as above, overwriting the previous version. 
@@ -76,6 +75,10 @@ The **New Figure** and **New Table** frames use several Word styles; feel free t
 The test suite includes *WordSupportTest.docm*. The introduction part of the document also contains basic instructions how to edit, test and and debug the package. Further *...Test.docm* files test different features.
 
 The **Update All** procedure has a hook to allow you to add your own processing. I use it, for example, to refresh my citations.  Just define the public subroutine **sub DoAdditionalDocumentUpdates()** in a module in your Normal template (or anywhere Word can find it), and put the VBA code there.
+
+## How it works 
+
+The **New Figure**, **New Table** and **Reposition** functions automate the manual instructions to create a floating frame from my [blog entry here](https://www.securedevelopment.org/2019/08/18/three-powerful-techniques-to-position-images-and-tables-in-word/). The **Relayout Document** implementation is based on LaTeX's image positioning rules. Briefly, it finds all the frames that match the selection criteria [above](#relayoutDocument) and prompts to continue. It then moves ('stashes') all the frames at the end of the document. Lastly, it takes each one, in the order that the references appear in the text, and tries to position it in the next of the slots available (top and bottom of a page, or top and bottom of each colum), moving the frame anchor forward and adjusting the frame layout parameters until it finds a position that works. 
 
 ## Troubleshooting
 
