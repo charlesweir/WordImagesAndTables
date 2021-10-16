@@ -45,8 +45,10 @@ We recommend doing **Update All** after **Relayout Document**, as the figure, ta
 
 Download and run the installer [*ImagesAndTableSupport.msi* here](https://github.com/charlesweir/WordImagesAndTables/releases/latest/download/ImageAndTableSupport.msi)
 
-**Note** - this may not work if your account cannot install software, of if the user template location is not the default, or for certain langage versions of Word (such as Turkish). If not, download [*ImageAndTableSupport.dotm* here](https://github.com/charlesweir/WordImagesAndTables/releases/latest/download/ImageAndTableSupport.dotm), and copy it into the Word startup folder, 
+**Note** - this may not work if your account cannot install software, if the user template location is not the default, or for certain langage versions of Word (such as Turkish). If not, download [*ImageAndTableSupport.dotm* here](https://github.com/charlesweir/WordImagesAndTables/releases/latest/download/ImageAndTableSupport.dotm), and copy it into the Word startup folder, 
+
     *%AppData%\Microsoft\Word\Startup*  
+    
 To go to that directory in Windows File Explorer, type the above string into the address bar and hit enter. Or if that fails, use [these instructions](https://wordaddins.com/support/how-to-find-the-word-startup-folder/) to find it.
 
 ### On Mac
@@ -61,7 +63,7 @@ To get to that folder in Finder, use Cmd-Shift-G, paste the above string into th
 
 ### If You Cannot Get Installation to Work
 
-If your computer is set up by an Information Systems department, then you may well be unable to install software, and you might even be unable to copy files to the Word STARTUP directory as described above. In that case you can copy the [*ImageAndTableSupport.dotm*](https://github.com/charlesweir/WordImagesAndTables/releases/latest/download/ImageAndTableSupport.dotm) file somewhere convenient in your working directory, and use [these instructions]( https://www.dummies.com/software/microsoft-office/word/how-to-change-a-documents-template-in-word-2016/) to attach the functions to the Word docx file you are working with.
+If your computer is set up by an Information Systems department, then you may well be unable to install software, and you might even be unable to copy files to the Word STARTUP directory as described above. In that case copy the [*ImageAndTableSupport.dotm*](https://github.com/charlesweir/WordImagesAndTables/releases/latest/download/ImageAndTableSupport.dotm) file somewhere convenient in your working directory, and use [these instructions]( https://www.dummies.com/software/microsoft-office/word/how-to-change-a-documents-template-in-word-2016/) to attach the functions to each Word docx file you are working with.
 
 ## Upgrading and Uninstalling.
 
