@@ -41,6 +41,8 @@ We recommend doing **Update All** after **Relayout Document**, as the figure, ta
 
 ## <a name="installation"/> How to Install the Plug-in
 
+The plug-in just adds the 6 buttons described above to the Layout tab. It is harmless, and has no effect unless you click one of those buttons. 
+ 
 ### On Windows
 
 Download and run the installer [*ImagesAndTableSupport.msi* here](https://github.com/charlesweir/WordImagesAndTables/releases/latest/download/ImageAndTableSupport.msi)
