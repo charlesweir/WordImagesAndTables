@@ -207,78 +207,68 @@ End Sub
 Private Sub InsertCrossReferenceBesideAnchor(autotextName As String)
 ' Inserts a reference field, such as "Figure 2" or "Table 7", just after the anchor.
 '
-' Word VBA doesn't support cross references to text in text frames (not text boxes), so we
-' move the caption to the main document, create the reference, then move it back again.
-'
-' To find the caption in the list of cross-referenceable items, we add a random tag to it.
+' Word VBA doesn't support cross references to text in text frames, so we
+' copy the caption to the main document to create the reference, then
+' move the invisible bookmark used for the reference back to the frame.
 
+    ' Copy the caption para into the main document
+    Dim placeInMainDocument As Range
+    Set placeInMainDocument = ActiveDocument.Content
+    placeInMainDocument.Collapse wdCollapseEnd ' Actually only gets to the end of the last full para
+    placeInMainDocument.FormattedText = FirstCaption.FormattedText
+
+    ' To find the caption in the list of cross-referenceable items, we add a random tag to it.
     Dim tag As String
     tag = "TAG" & Int(99999999 * Rnd)
-    
-    ' Remember where the caption was.
-    Dim captionLocation As Range
-    Set captionLocation = FirstCaption
-    If autotextName = "Figure" Then captionLocation.InsertAfter (vbCrLf)
-    captionLocation.Collapse
-
-    ' Move the caption para into the main document and tag it
-    Dim theCaption As Range
-    Set theCaption = FirstCaption
-    theCaption.Cut
-    Set theCaption = ActiveDocument.Content
-    theCaption.Collapse wdCollapseEnd
-    theCaption.InsertBefore vbCrLf
-    theCaption.Collapse wdCollapseEnd
-    theCaption.Paste
-    
     Dim tagLocation As Range
-    Set tagLocation = theCaption
+    Set tagLocation = placeInMainDocument.Duplicate
     tagLocation.Collapse wdCollapseEnd
     tagLocation.Move wdCharacter, -1
-    tagLocation.InsertAfter tag ' sets tagLocation to the range of the inserted tag
-
-    ' Create the cross reference to it after the anchor:
+    tagLocation.InsertAfter tag ' placeInMainDocument now contains the tag.
+    
+    ' And find the item to cross reference using the tag according to the GetCrossReferenceItems ritual
     Dim items() As String
-    'Debug.Print "ActiveDocument.GetCrossReferenceItems"
+    ' Debug.Print "ActiveDocument.GetCrossReferenceItems"
     items = ActiveDocument.GetCrossReferenceItems(autotextName)
     ' Answers an array of strings, "123. Figure 1/ The Caption", plus all the numbered paras etc.
-    'Debug.Print "Done"
     Dim crossRefItem As Integer
     For crossRefItem = LBound(items) To UBound(items)
+        Debug.Print items(crossRefItem)
         If InStr(items(crossRefItem), tag) <> 0 Then GoTo ItemFound
     Next crossRefItem: Debug.Assert False ' Tag not found. Ouch!
 ItemFound:
 
+    ' Create the cross reference to it just after the anchor point:
     Dim afterAnchor As Range
     Set afterAnchor = myFrame.Anchor
     afterAnchor.Collapse wdCollapseEnd
+    afterAnchor.InsertCrossReference _
+        ReferenceType:=autotextName, _
+        ReferenceKind:=wdOnlyLabelAndNumber, _
+        ReferenceItem:="" & crossRefItem, _
+        InsertAsHyperlink:=False, IncludePosition:=False, SeparateNumbers:=False, SeparatorString:=" "
     
-    afterAnchor.InsertCrossReference ReferenceType:=autotextName, ReferenceKind:= _
-        wdOnlyLabelAndNumber, ReferenceItem:="" & crossRefItem, InsertAsHyperlink:=False, _
-        IncludePosition:=False, SeparateNumbers:=False, SeparatorString:=" "
-    
+    ' And set our RefField the field we've just inserted
     afterAnchor.Expand wdSentence
-    Set RefField = afterAnchor.Fields(1) ' Might not actually be correct, but who cares? We only use it for updating...
+    Set RefField = afterAnchor.Fields(1)
     
-    ' There's a bizarre Word error here, where the caption paragraph isn't editable for a short time after the InsertCrossReference command.
-    ' Turns out in Windows we can simply wait for Word to sort it out...
-    On Error Resume Next
-    Do
-        DoEvents
-        tagLocation.Delete
-        Debug.Assert Err.Number = 4605 Or Err.Number = 5904 Or Err.Number = 0 ' or 91?  4605 is Windows, 5904 is Mac, but doesn't seem to clear - Ignore it.
-    Loop While Err.Number = 4605
-    On Error GoTo 0
+    ' Now find the invisible bookmark created by InsertCrossReference
+    placeInMainDocument.Bookmarks.ShowHidden = True
+    placeInMainDocument.Expand wdSentence
+    Dim b As Bookmark
+    Set b = placeInMainDocument.Bookmarks(1)
     
-    ' Finally, move the caption para back, and tidy up.
-    theCaption.Expand wdParagraph
-    theCaption.Cut
-    theCaption.Delete wdCharacter, Len(vbCrLf)   ' Ending CRLF
-    captionLocation.Paste
-    ' In the case of the table, we somehow lose the caption style (not sure why). Just put it back.
-    captionLocation.Style = "Caption"
-    captionLocation.Collapse wdCollapseEnd
-    captionLocation.Delete wdCharacter ' the following empty paragraph.
+    ' And move it back to inside the frame.
+    ' The invisible bookmark actually covers the first "Figure 1" part of the caption.
+    ' So it's the same length and name as b, but in a different place.
+    Dim placeForBookmark As Range
+    Set placeForBookmark = FirstCaption.Duplicate
+    placeForBookmark.End = FirstCaption.Start + b.End - b.Start
+    ActiveDocument.Bookmarks.Add b.Name, placeForBookmark
+    
+    ' And tidy up the stuff we added to the main document
+    placeInMainDocument.Delete
+    
 End Sub
 ' Static
 Public Function IsValidFrame(shp As Shape) As Boolean
