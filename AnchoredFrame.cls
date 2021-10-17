@@ -207,67 +207,29 @@ End Sub
 Private Sub InsertCrossReferenceBesideAnchor(autotextName As String)
 ' Inserts a reference field, such as "Figure 2" or "Table 7", just after the anchor.
 '
-' Word VBA doesn't support cross references to text in text frames, so we
-' copy the caption to the main document to create the reference, then
-' move the invisible bookmark used for the reference back to the frame.
+' We need a hidden bookmark in the caption. This randomly generated, of the form _Ref12345678.
+' It must be added to the main document's bookmarks (not the frame's bookmarks)
+' It points to the part of the caption up to the end of the number field
+' The field to reference it is simply a REF field, with parameter the bookmark name.
 
-    ' Copy the caption para into the main document
-    Dim placeInMainDocument As Range
-    Set placeInMainDocument = ActiveDocument.Content
-    placeInMainDocument.Collapse wdCollapseEnd ' Actually only gets to the end of the last full para
-    placeInMainDocument.FormattedText = FirstCaption.FormattedText
+' This implements what InsertCrossReferenceItem does, but without its bugs and difficulty of use.
 
-    ' To find the caption in the list of cross-referenceable items, we add a random tag to it.
-    Dim tag As String
-    tag = "TAG" & Int(99999999 * Rnd)
-    Dim tagLocation As Range
-    Set tagLocation = placeInMainDocument.Duplicate
-    tagLocation.Collapse wdCollapseEnd
-    tagLocation.Move wdCharacter, -1
-    tagLocation.InsertAfter tag ' placeInMainDocument now contains the tag.
+    ' Random bookmark name:
+    Dim bookmarkName As String
+    bookmarkName = "_Ref" & Int(99999999 * Rnd)
     
-    ' And find the item to cross reference using the tag according to the GetCrossReferenceItems ritual
-    Dim items() As String
-    ' Debug.Print "ActiveDocument.GetCrossReferenceItems"
-    items = ActiveDocument.GetCrossReferenceItems(autotextName)
-    ' Answers an array of strings, "123. Figure 1/ The Caption", plus all the numbered paras etc.
-    Dim crossRefItem As Integer
-    For crossRefItem = LBound(items) To UBound(items)
-        Debug.Print items(crossRefItem)
-        If InStr(items(crossRefItem), tag) <> 0 Then GoTo ItemFound
-    Next crossRefItem: Debug.Assert False ' Tag not found. Ouch!
-ItemFound:
-
+    ' The invisible bookmark should cover the first "Figure 1" part of the caption. <1> is a field.
+    Dim placeForBookmark As Range
+    Set placeForBookmark = FirstCaption
+    placeForBookmark.End = placeForBookmark.Fields(1).Result.End
+    ActiveDocument.Bookmarks.Add bookmarkName, placeForBookmark
+    
     ' Create the cross reference to it just after the anchor point:
     Dim afterAnchor As Range
     Set afterAnchor = myFrame.Anchor
     afterAnchor.Collapse wdCollapseEnd
-    afterAnchor.InsertCrossReference _
-        ReferenceType:=autotextName, _
-        ReferenceKind:=wdOnlyLabelAndNumber, _
-        ReferenceItem:="" & crossRefItem, _
-        InsertAsHyperlink:=False, IncludePosition:=False, SeparateNumbers:=False, SeparatorString:=" "
     
-    ' And set our RefField the field we've just inserted
-    afterAnchor.Expand wdSentence
-    Set RefField = afterAnchor.Fields(1)
-    
-    ' Now find the invisible bookmark created by InsertCrossReference
-    placeInMainDocument.Bookmarks.ShowHidden = True
-    placeInMainDocument.Expand wdSentence
-    Dim b As Bookmark
-    Set b = placeInMainDocument.Bookmarks(1)
-    
-    ' And move it back to inside the frame.
-    ' The invisible bookmark actually covers the first "Figure 1" part of the caption.
-    ' So it's the same length and name as b, but in a different place.
-    Dim placeForBookmark As Range
-    Set placeForBookmark = FirstCaption.Duplicate
-    placeForBookmark.End = FirstCaption.Start + b.End - b.Start
-    ActiveDocument.Bookmarks.Add b.Name, placeForBookmark
-    
-    ' And tidy up the stuff we added to the main document
-    placeInMainDocument.Delete
+    Set RefField = ActiveDocument.Fields.Add(Range:=afterAnchor, Type:=wdFieldRef, Text:=bookmarkName, PreserveFormatting:=False) ' Preserve means \* MERGEFORMAT
     
 End Sub
 ' Static
