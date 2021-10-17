@@ -221,6 +221,11 @@ Private Sub InsertCrossReferenceBesideAnchor(autotextName As String)
     ' The invisible bookmark should cover the first "Figure 1" part of the caption. <1> is a field.
     Dim placeForBookmark As Range
     Set placeForBookmark = FirstCaption
+    ' Remove existing (invisible) bookmarks. Todo: Shouldn't be there, because we're a vanilla autotext.
+    placeForBookmark.Bookmarks.ShowHidden = True
+    While placeForBookmark.Bookmarks.Count > 0
+        placeForBookmark.Bookmarks(1).Delete
+    Wend
     placeForBookmark.End = placeForBookmark.Fields(1).Result.End
     ActiveDocument.Bookmarks.Add bookmarkName, placeForBookmark
     
