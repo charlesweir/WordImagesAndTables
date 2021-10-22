@@ -194,10 +194,10 @@ Private Static Sub PreserveImageCroppingAndSizing(IsPaste)
                 .cropTop = cropTop
                 .cropBottom = cropBottom
             End With
-            .ScaleHeight = ScaleHeight
-            .ScaleWidth = ScaleWidth
-            .Height = Height
-            .Width = Width
+            
+            ' Now, we want the same width after cropping; height the same proportional scaling
+            .Width = Width ' Which sets .ScaleWidth:
+            .ScaleHeight = .ScaleWidth * ScaleHeight / ScaleWidth
             
             .Line.Visible = lineVisible
             If lineVisible Then
