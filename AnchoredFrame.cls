@@ -140,7 +140,7 @@ End Property
 
 Public Sub MoveAnchorTo(workingPosition As Range)
     ' Moves the anchor of the frame to workingPosition, or as soon after it as possible.
-    myFrame.Anchor.Cut
+    'myFrame.Anchor.Cut
     workingPosition.Collapse (wdCollapseEnd) ' After previous pastes.
     
     ' If we're in a field, the frame could be wiped out by an update.
@@ -148,7 +148,28 @@ Public Sub MoveAnchorTo(workingPosition As Range)
         Set workingPosition = workingPosition.Next(Unit:=wdCharacter)
         workingPosition.Collapse wdCollapseEnd
     Wend
-    workingPosition.Paste
+    
+    ' Copy it over
+    Dim oldAnchor, placeForNewBookmark As Range
+    Set oldAnchor = myFrame.Anchor
+    workingPosition.FormattedText = oldAnchor.FormattedText
+    
+    ' And sort out bookmarks and mess:
+    Dim newFrame As Shape
+    Set newFrame = workingPosition.ShapeRange(1)
+    
+    ' Where we want to put the bookmark (Todo: refactor).
+    Dim para As Paragraph
+    For Each para In newFrame.TextFrame.TextRange.Paragraphs
+        If para.Style = "Caption" Then GoTo FoundPara ' Could be Like, if several caption types
+    Next para: Debug.Assert False ' No caption found
+FoundPara:
+    Set placeForNewBookmark = para.Range
+    placeForNewBookmark.End = placeForNewBookmark.Fields(1).Result.End
+    ActiveDocument.Bookmarks.Add FrameBookmark.Name, placeForNewBookmark
+    
+    Set myFrame = newFrame
+    oldAnchor.Delete
 End Sub
 
 Public Sub Stash()
