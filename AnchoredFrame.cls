@@ -45,6 +45,11 @@ Public Property Get ReferenceColumnNumber() As Integer
     ReferenceColumnNumber = ColumnNumberFor(myReferencingField.Result)
 End Property
 
+Public Property Get AnchorColumnNumber() As Integer
+    ' Answers the column number containing the anchor.
+    AnchorColumnNumber = ColumnNumberFor(myFrame.Anchor)
+End Property
+
 Public Property Get SectionNumber() As Integer
     ' Answers the page number containing the frame.
     SectionNumber = myOriginalSectionNumber
@@ -164,10 +169,10 @@ Public Sub SetToFloatAt(topOrBottom As Long)
         If .Top <> topOrBottom Then .Top = topOrBottom
         
         ' Special. There's an odd word bug (Windows and Mac) where sometimes a frame centred at the top of the right column actually moves an inch to the left,
-        ' messing up the left hand column.
-        If (topOrBottom = wdShapeTop) And (NumColumns > 1) And (ReferenceColumnNumber = 2) Then
+        ' messing up the left hand column. Align it right to the margin instead.
+        If (topOrBottom = wdShapeTop) And (NumColumns > 1) And (AnchorColumnNumber = 2) Then
             .Left = wdShapeRight ' strictly we ought to either check for the bug first, or calculate an exact position, but both are hard to do.
-            ' Bizarrely the above appears to fix the problem, but the frame still ends up centered in the column and 'Layout Options' shows it as centred. I have no idea what's going on. Word!!!!
+            .RelativeHorizontalPosition = wdRelativeHorizontalPositionMargin
         End If
     End With
 End Sub
