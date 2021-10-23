@@ -1,7 +1,8 @@
 <?xml version='1.0' encoding='windows-1252'?>
 
 <!-- Wix Installer script for ImageAndTableSupport.
- See https://wixtoolset.org/documentation/ and tool/compilation instructions -->
+ See https://wixtoolset.org/documentation/ and tool/compilation instructions
+ Use https://www.guidgenerator.com/online-guid-generator.aspx for GUIDs -->
 
 <?define ProductName='Image and Table Support for Microsoft Word' ?>
 <?define ProductVersion='2.4' ?>
