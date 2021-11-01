@@ -1,7 +1,7 @@
-# Microsoft Word Plug-in to Layout Images and Tables as a Desktop Publisher
+# Microsoft Word Plug-in towards Layout Images and Tables as a Desktop Publisher
 
 <br>
-New, wonderful, support for desktop publishing in Microsoft Word: beautiful layout of floating images and tables!
+New, wonderful, support towards desktop publishing in Microsoft Word: beautiful layout of floating images and tables!
 
 Click [here](#installation) to skip to the installation instructions and [here](#instructions) for the usage instructions.
 
