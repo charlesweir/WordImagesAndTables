@@ -17,26 +17,34 @@ Sub LayoutFloatingImages()
     LayoutFloatingImagesFor ActiveDocument.StoryRanges(wdMainTextStory)
 End Sub
 
-Public Function ImagesToLayoutInDocument() As Collection
+Public Function ImagesToLayoutInDocument() As collection ' Deprecated!
     ' Answers a collection of all the AnchoredFrame objects needing layout in the current document.
     
-    ' Collects the frames we want to reposition, and the locations of their first relevant reference:
+    Set ImagesToLayoutInDocument = New collection
+    Dim clsAnchoredFrame As New AnchoredFrame
+    
+    ShowStatusBarMessage ("Analysing frames to reposition")
+    AnalyseImagesToLayoutInDocument ImagesToLayoutInDocument, New collection
+End Function
 
+Public Sub AnalyseImagesToLayoutInDocument(imagesToLayout As collection, imagesIgnored As collection)
+' Fills collections of (1) AnchoredFrame objects representing all those needing layout in the current document, and (2) those that a user might expect to be laid out but will not be.
     Dim clsAnchoredFrame As New AnchoredFrame
     ShowStatusBarMessage ("Analysing frames to reposition")
-    Set ImagesToLayoutInDocument = clsAnchoredFrame.RepositionableFramesInRegion(ActiveDocument.StoryRanges(wdMainTextStory))
-End Function
+    clsAnchoredFrame.AnalyseFramesInRegion ActiveDocument.StoryRanges(wdMainTextStory), imagesToLayout, imagesIgnored
+End Sub
 
 Public Sub LayoutFloatingImagesFor(region As Range)
     ' Re-lays out all the AnchoredFrames in the given region
     
-    Dim imagesToLayout As Collection
+    Dim imagesToLayout As collection
+    Set imagesToLayout = New collection
     Dim clsAnchoredFrame As New AnchoredFrame
-    Set imagesToLayout = clsAnchoredFrame.RepositionableFramesInRegion(region)
+    clsAnchoredFrame.AnalyseFramesInRegion region, imagesToLayout, New collection
     LayoutTheseFloatingImages imagesToLayout
 End Sub
 
-Public Sub LayoutTheseFloatingImages(myFramesToLayout As Collection)
+Public Sub LayoutTheseFloatingImages(myFramesToLayout As collection)
     ' Repositions each of the given AnchoredFrames according, roughly, to the Latex rules.
     
     Dim oAnchoredFrame As AnchoredFrame

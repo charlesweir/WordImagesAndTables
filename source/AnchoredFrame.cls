@@ -17,7 +17,7 @@ Private myFrame As Shape
 Private myReferencingField As field
 Private myOriginalSectionNumber As Integer ' we get moved to the document end. Remember our section number.
 
-Public Property Set Frame(newFrame As Shape)
+Public Property Set frame(newFrame As Shape)
     Set myFrame = newFrame
     myOriginalSectionNumber = myFrame.Anchor.Information(wdActiveEndSectionNumber)
 End Property
@@ -218,7 +218,7 @@ Public Sub InitWithNewFrameAt(oRng As Range, autotextName As String)
     Set rngInsertedAnchor = ThisTemplate.AutoTextEntries(LCase(autotextName)).Insert(where:=oRng, RichText:=True)
     'Debug.Print "Done"
     Debug.Assert rngInsertedAnchor.ShapeRange.Count = 1 ' Autotext contains floating frame
-    Set Frame = rngInsertedAnchor.ShapeRange(1)
+    Set frame = rngInsertedAnchor.ShapeRange(1)
     ' Set the frame up to be the column width, and automatically resize vertically.
     With myFrame
         .Width = CurrentPageSetup.TextColumns.Width
@@ -272,9 +272,6 @@ Public Function IsValidFrame(shp As Shape) As Boolean
     
     Debug.Print "analysing " & shp.TextFrame.TextRange.Text
     
-    ' Don't layout frames aligned left or right in a single-column section.
-    If (shp.Left = wdShapeLeft Or shp.Left = wdShapeRight) And (shp.Anchor.Sections(1).PageSetup.TextColumns.Count = 1) Then Exit Function
-    
     ' Only layout frames with the invisible bookmarks to captions created by Insert - Cross reference - [to Table, or to Figure], or by InsertFrame().
     Dim bookmarkSet As Bookmarks
     Set bookmarkSet = shp.TextFrame.TextRange.Bookmarks
@@ -311,14 +308,14 @@ Public Function ColumnNumberFor(rng As Range) As Integer
 End Function
        
 ' Static
-Function RepositionableFramesInRegion(region As Range) As Collection
-' Answers a collection of relevant AnchoredFrames - ones with references - in the given region.
+Sub AnalyseFramesInRegion(region As Range, imagesToLayout As collection, imagesIgnored As collection)
+' Fills a collection of relevant AnchoredFrames - ones with references - in the given region.
+' Also fills imagesIgnored a collection of AnchoredFrames that look valid but were rejected because:
+'  1) No link in the same section
+'  2) Is left or right aligned in a single column page.
 
     Dim oAnchoredFrame As AnchoredFrame
-    Dim allFramesInRegion As Collection
-    Set allFramesInRegion = New Collection
-    
-    Set RepositionableFramesInRegion = New Collection
+    Dim allFramesInRegion As New collection
     
     ' First, find all the text frames
     Dim currentFrame As Shape
@@ -326,8 +323,13 @@ Function RepositionableFramesInRegion(region As Range) As Collection
         Debug.Assert Not currentFrame Is Nothing ' If this fires, Word is still sorting out itself. Wait and try again later.
         If IsValidFrame(currentFrame) Then
             Set oAnchoredFrame = New AnchoredFrame
-            Set oAnchoredFrame.Frame = currentFrame
-            allFramesInRegion.Add Item:=oAnchoredFrame, key:=oAnchoredFrame.BookmarkId
+            Set oAnchoredFrame.frame = currentFrame
+            ' Don't layout frames aligned left or right in a single-column section.
+            If (currentFrame.Left = wdShapeLeft Or currentFrame.Left = wdShapeRight) And (currentFrame.Anchor.Sections(1).PageSetup.TextColumns.Count = 1) Then
+                imagesIgnored.Add Item:=oAnchoredFrame, key:=oAnchoredFrame.Name
+            Else
+                allFramesInRegion.Add Item:=oAnchoredFrame, key:=oAnchoredFrame.BookmarkId
+            End If
         End If
     Next
     
@@ -348,17 +350,23 @@ Function RepositionableFramesInRegion(region As Range) As Collection
             ' Only pair references within a section. (I have forward references to figures at the start of my Thesis)
             If (ReferencingField.Code.Information(wdActiveEndSectionNumber) = oAnchoredFrame.SectionNumber) Then
                 Set oAnchoredFrame.RefField = ReferencingField
-                RepositionableFramesInRegion.Add oAnchoredFrame
+                imagesToLayout.Add oAnchoredFrame, key:=oAnchoredFrame.Name
                 ' And remove it, so that we ignore later references.
                 allFramesInRegion.Remove bookmarkName
             End If
         End If
         Set previousField = ReferencingField
     Next ReferencingField
-End Function
+    
+    ' All the remaining items in imagesToLayout will be ignored:
+    For Each oAnchoredFrame In allFramesInRegion
+        imagesIgnored.Add Item:=oAnchoredFrame, key:=oAnchoredFrame.Name
+    Next
+    
+End Sub
 
 ' Static
-Private Function ContainsKey(col As Collection, key As String) As Boolean
+Private Function ContainsKey(col As collection, key As String) As Boolean
 ' Answers true if Collection col contains key
     On Error Resume Next
     col (key) ' Just try it. If it fails, Err.Number will be nonzero.

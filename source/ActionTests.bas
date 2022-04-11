@@ -5,9 +5,10 @@ Attribute VB_Name = "ActionTests"
 
 Sub ActionTests()
     ' Reset the undo buffer, and fix the selection:
-    
     ActiveDocument.UndoClear
     Set cursorLocation = Selection.Range
+    
+    Figure1Top = ActiveDocument.Shapes(1).Top
 
     For Each mySection In ActiveDocument.Sections
         Dim oRangeTested As Range
@@ -32,6 +33,7 @@ Sub ActionTests()
                 Debug.Assert bookmarkSet.Count > 0 ' If not, we've messed up our references somewhere.
                 Debug.Assert bookmarkSet(1).Name Like "_Ref##*" ' If not, I don't know what's going on.
                 myFrames.Add Item:=shp, key:=bookmarkSet(1).Range.Text ' Gives "Figure NN"
+                
             End If
         Next
         
@@ -68,9 +70,28 @@ nextMySection:
     
     ' And reset everything.
     ActiveDocument.Undo (1000)
+    
+    ' Check Undo worked. If Figure 1 is back as before, then presumably everything else is.
+    Set F1 = ActiveDocument.Shapes(1)
+    Debug.Assert F1.Top = Figure1Top
+    
+    ' And reset the cursor.
     cursorLocation.Select
+    
+    ' Check the list of frames to be laid out...
+    Set myFrames = New Collection
+    Dim ignoredFrames As New Collection
+    Application.Run "LayoutFloatingImages.AnalyseImagesToLayoutInDocument", myFrames, ignoredFrames
+    Debug.Assert ContainsKey(myFrames, "Figure 1")
+    Debug.Assert Not ContainsKey(myFrames, "Figure 8") ' Right aligned
+    Debug.Assert Not ContainsKey(myFrames, "Figure 18") ' Reference is in different section.
+    Debug.Assert Not ContainsKey(ignoredFrames, "Figure 1")
+    Debug.Assert ContainsKey(ignoredFrames, "Figure 8")
+    Debug.Assert ContainsKey(ignoredFrames, "Figure 18")
+    
     MsgBox ("All tests completed")
 End Sub
+
 
 Private Function ColumnNumber(rng As Range) As Integer
     ColumnNumber = 1 ' default
@@ -92,3 +113,12 @@ Private Sub ShowStatusBarMessage(message As String)
     End If
     DoEvents
 End Sub
+
+Private Function ContainsKey(col As Collection, key As String) As Boolean
+' Answers true if Collection col contains key
+    On Error Resume Next
+    col (key) ' Just try it. If it fails, Err.Number will be nonzero.
+    ContainsKey = (Err.Number = 0)
+    Err.Clear
+    On Error GoTo 0 ' Reset
+End Function
