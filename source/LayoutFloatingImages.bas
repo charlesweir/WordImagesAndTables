@@ -12,21 +12,6 @@ Attribute VB_Name = "LayoutFloatingImages"
 Option Explicit ' All variables must be defined.
 
 
-Sub LayoutFloatingImages()
-    ' Lays out all the anchored frames in the document
-    LayoutFloatingImagesFor ActiveDocument.StoryRanges(wdMainTextStory)
-End Sub
-
-Public Function ImagesToLayoutInDocument() As collection ' Deprecated!
-    ' Answers a collection of all the AnchoredFrame objects needing layout in the current document.
-    
-    Set ImagesToLayoutInDocument = New collection
-    Dim clsAnchoredFrame As New AnchoredFrame
-    
-    ShowStatusBarMessage ("Analysing frames to reposition")
-    AnalyseImagesToLayoutInDocument ImagesToLayoutInDocument, New collection
-End Function
-
 Public Sub AnalyseImagesToLayoutInDocument(imagesToLayout As collection, imagesIgnored As collection)
 ' Fills collections of (1) AnchoredFrame objects representing all those needing layout in the current document, and (2) those that a user might expect to be laid out but will not be.
     Dim clsAnchoredFrame As New AnchoredFrame
@@ -35,7 +20,7 @@ Public Sub AnalyseImagesToLayoutInDocument(imagesToLayout As collection, imagesI
 End Sub
 
 Public Sub LayoutFloatingImagesFor(region As Range)
-    ' Re-lays out all the AnchoredFrames in the given region
+    ' Re-lays out all the AnchoredFrames in the given region (only used for testing)
     
     Dim imagesToLayout As collection
     Set imagesToLayout = New collection
@@ -70,17 +55,7 @@ Public Sub LayoutTheseFloatingImages(myFramesToLayout As collection)
         clsColumnLayout.PositionFrame oAnchoredFrame
     Next oAnchoredFrame
 
-    ' EmptyCutBuffer ' Upsets Mac.
-
     ShowStatusBarMessage ("Repositioned " & myFramesToLayout.Count & " frames")
-End Sub
-
-Private Sub EmptyCutBuffer()
-    ' Empty cut buffer to stop extra "Do you want to save clipboard?" on exit
-    Dim aDataObject As DataObject
-    Set aDataObject = New DataObject
-    aDataObject.SetText Text:=" "
-    aDataObject.PutInClipboard
 End Sub
 
 

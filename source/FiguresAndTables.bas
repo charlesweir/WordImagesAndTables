@@ -53,7 +53,7 @@ Sub ButtonPressed(control As IRibbonControl)
 
         
         If MsgBox("Found " & framesToLayout.Count & " Figures and Tables to layout" & vbCrLf & vbCrLf & _
-                "Omitting: " & vbCrLf & _
+                "These will not be laid out: " & vbCrLf & _
                 ListOfFrameNames(framesIgnored) & vbCrLf & _
                 "Do you wish to continue?", vbYesNo) <> vbYes Then
             Exit Sub
