@@ -75,10 +75,11 @@ Sub PositionFrame(newFrame As AnchoredFrame)
             ' Todo: Add special case. Top of page is continued table, in which case we want to be bottom.
             .SetToFloatAt IIf(desiredPos = ppTop, wdShapeTop, wdShapeBottom)
     
-            ' Unless the anchor is now on a different page number or column number
+            ' Unless the anchor is now on a different page number or (for single column images) column number.
             ' or Word has misbehaved and put both overlapping anyway.
             ' we're done.
-            If .FramePageNumber = workingPage And CurrentColumn = startingCol And CanFitInColumn(newFrame, CurrentColumn) Then
+            If .FramePageNumber = workingPage And ((Not .FitsInColumn) Or _
+                     (CanFitInColumn(newFrame, CurrentColumn) And CurrentColumn = startingCol)) Then
                 ' We're done
                 UpdateColumnSpace newFrame
                 Exit Sub
