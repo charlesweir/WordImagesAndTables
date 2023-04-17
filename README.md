@@ -80,13 +80,18 @@ The **New Figure** and **New Table** frames use several Word styles; feel free t
 
 ## Developer instructions
 
+Though the macros work both in Word for Windows and Word for Mac, the Word for Windows environment is more stable and better for development and testing. 
+
 The test suite includes *WordSupportTest.docm*. The introduction part of the document also contains basic instructions how to edit, test and and debug the package. Further *...Test.docm* files test different features.
 
 The **Update All** procedure has a hook to allow you to add your own processing. I use it, for example, to refresh my citations.  Just define the public subroutine **sub DoAdditionalDocumentUpdates()** in a module in your Normal template (or anywhere Word can find it), and put the VBA code there.
 
+To **Create the MSI package**, you need to install [Wix 3.11.2](https://github.com/wixtoolset/wix3/releases/tag/wix3112rtm). In my vanilla Windows 11, this required both enabling and installing the DotNet framework, and finding the binaries and adding them manually to the path. Then simply run **MakeInstaller.cmd**.
+
 ## How it works 
 
 The **New Figure**, **New Table** and **Reposition** functions automate the manual instructions to create a floating frame from my [blog entry here](https://www.securedevelopment.org/2019/08/18/three-powerful-techniques-to-position-images-and-tables-in-word/). The **Relayout Document** implementation is based on LaTeX's image positioning rules. Briefly, it finds all the frames that match the selection criteria [above](#relayoutDocument) and prompts to continue. It then moves ('stashes') all the frames at the end of the document. Lastly, it takes each one, in the order that the references appear in the text, and tries to position it in the next of the slots available (top and bottom of a page, or top and bottom of each colum), moving the frame anchor forward and adjusting the frame layout parameters until it finds a position that works. 
+
 
 ## Troubleshooting
 
